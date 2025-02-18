@@ -1,0 +1,30 @@
+{
+  "name": "valaxy-theme-arona",
+  "version": "0.0.1",
+  "packageManager": "pnpm@9.5.0",
+  "author": {
+    "email": "stzr@rduteam.top",
+    "name": "fingtest6",
+    "url": "https://stzr.cjhcjh6.top"
+  },
+  "homepage": "https://arona.demo.cjhcjh6.top",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fingtest6/valaxy-theme-arona"
+  },
+  "keywords": [
+    "valaxy",
+    "theme",
+    "arona",
+    "vue"
+  ],
+  "main": "client/index.ts",
+  "types": "types/index.d.ts",
+  "dependencies": {
+    "@iconify-json/ant-design": "^1.1.16",
+    "@iconify-json/simple-icons": "^1.1.109"
+  },
+  "devDependencies": {
+    "valaxy": "^0.19.1"
+  }
+}
