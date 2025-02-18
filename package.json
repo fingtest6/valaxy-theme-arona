@@ -23,5 +23,8 @@
     "valaxy-theme-arona": "workspace:*",
     "vitest": "^1.6.0",
     "vue-tsc": "^2.0.26"
+  },
+  "dependencies": {
+    "gitalk": "^1.8.0"
   }
 }

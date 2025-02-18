@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import type { PageData, Post } from 'valaxy'
 import { useSiteConfig } from 'valaxy'
+import { AthemeConfig } from '../config'
+import Gitalk from './Gitalk.vue'
+import 'gitalk/dist/gitalk.css'
 
 defineProps<{
   frontmatter: Post
@@ -24,6 +27,10 @@ const siteConfig = useSiteConfig()
                 <slot />
               </ValaxyMd>
             </div>
+            <div class="view-box container">
+              <content class="content" />
+              <Gitalk v-if="AthemeConfig.clientID" />
+            </div>
             <slot name="main-content-after" />
           </slot>
         </div>
@@ -35,7 +42,6 @@ const siteConfig = useSiteConfig()
         <slot name="main-nav-after" />
 
         <slot v-if="siteConfig.comment.enable && frontmatter.comment !== false" name="comment" />
-
         <slot name="footer" />
       </slot>
     </div>
