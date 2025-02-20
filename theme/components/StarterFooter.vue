@@ -22,17 +22,18 @@ const footerIcon = computed(() => themeConfig.value.footer.icon!)
 
 function adjustFooterPosition() {
   const footer = footerRef.value
-  if (footer) {
-    // 强制重新计算布局
-    // eslint-disable-next-line ts/no-unused-expressions
-    footer.offsetHeight
+  if (!footer)
+    return
 
-    // 检测是否为主页
-    if (route.path === '/') {
-      footer.style.position = 'fixed'
-      return
-    }
-
+  if (route.path === '/') {
+    // 主页：固定页脚
+    footer.style.position = 'fixed'
+  }
+  else if (route.path.startsWith('/posts/')) { // 动态匹配 /posts/ 开头的路径
+    // /posts/ 及其子页面：相对定位
+    footer.style.position = 'relative'
+  }
+  else {
     // 非主页时根据页面高度动态调整
     const pageHeight = document.documentElement.scrollHeight
     const windowHeight = window.innerHeight
