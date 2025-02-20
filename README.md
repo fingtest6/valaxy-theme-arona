@@ -62,6 +62,7 @@ Add `New repository secret`:
 npm run release
 # choose your version to automatic release
 ```
+
 ## Thanks
 
 arona theme ref theme:
