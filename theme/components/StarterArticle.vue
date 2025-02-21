@@ -18,7 +18,10 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
 </script>
 
 <template>
-  <article class="xl:divide-y xl:divide-gray-200 xl:dark:divide-gray-700">
+  <div class="pointer-events-none fixed inset-0 backdrop-blur-2xl -z-10" />
+  <article
+    class="relative mx-auto max-w-4xl rounded-2xl bg-white/80 p-8 shadow-2xl backdrop-blur-xl dark:bg-gray-800/80"
+  >
     <header class="pt-6 text-center space-y-1 xl:pb-10">
       <StarterDate :date="frontmatter.date" />
       <h1
@@ -37,9 +40,7 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
         <slot />
       </div>
 
-      <footer
-        class="text-sm font-medium leading-5 xl:col-start-1 xl:row-start-2 divide-y divide-gray-200 dark:divide-gray-700"
-      >
+      <footer class="bg-transparent text-sm font-medium leading-5 xl:col-start-1 xl:row-start-2 divide-y divide-gray-200 dark:divide-gray-700">
         <div v-if="nextPost && nextPost.path" class="py-8">
           <h2 class="text-xs text-gray-500 tracking-wide uppercase">
             Next Article
@@ -61,7 +62,7 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
           </div>
         </div>
         <div class="pt-8">
-          <RouterLink class="link" to="/">
+          <RouterLink class="link" to="/allposts">
             ← Back to the blog
           </RouterLink>
         </div>

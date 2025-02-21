@@ -1,37 +1,36 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 import md5 from 'md5'
-import Gitalk from 'gitalk' // 导入类型声明
+import Gitalk from 'gitalk' // 导入 Gitalk
 import { AthemeConfig } from '../config'
 import GitalkOptions = Gitalk.GitalkOptions
 
-interface IGitalkInstance {
-  render: (id: string) => void
-  destroy: () => void
-}
-
-let gitalk: IGitalkInstance | null = null
+let gitalk: any | null = null // 不需要自定义接口，直接使用 any 类型
 
 onMounted(() => {
-  // 显式声明类型并转换readonly数组
+  // 配置 Gitalk 参数
   const commentConfig: GitalkOptions = {
     clientID: AthemeConfig.clientID,
     clientSecret: AthemeConfig.clientSecret,
     repo: AthemeConfig.repo,
     owner: AthemeConfig.owner,
-    admin: [...AthemeConfig.admin], // 解除readonly
+    admin: [...AthemeConfig.admin], // 解除 readonly
     title: document.title, // 添加必填字段
     id: md5(location.pathname).slice(0, 50),
     distractionFreeMode: false,
-    // 添加Gitalk要求的其他默认字段
   }
 
-  gitalk = new Gitalk(commentConfig) as IGitalkInstance
+  // 初始化 Gitalk 实例并渲染
+  gitalk = new Gitalk(commentConfig)
   gitalk.render('gitalk-container')
 })
 
 onUnmounted(() => {
-  gitalk?.destroy()
+  // 手动清理 DOM 元素
+  const container = document.getElementById('gitalk-container')
+  if (container) {
+    container.innerHTML = '' // 清空容器内容
+  }
 })
 </script>
 
