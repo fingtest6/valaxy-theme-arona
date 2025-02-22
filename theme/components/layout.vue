@@ -17,7 +17,7 @@ onMounted(() => {
   <!-- 外层容器保持原样 -->
   <div class="antialiased">
     <!-- 原有导航和内容结构完全不变 -->
-    <div class="flex items-center px-4">
+    <div class="flex items-center px-4 bg-gray-100/10 backdrop-blur-md">
       <StarterNav />
       <button
         type="button"
