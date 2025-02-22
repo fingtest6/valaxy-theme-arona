@@ -14,7 +14,7 @@ const themeConfig = useThemeConfig()
 
 <template>
   <nav w="full" class="flex items-center py-1 font-bold">
-    <RouterLink class="text-xl" to="/" :aria-label="siteConfig.title" style="color: darkblue">
+    <RouterLink class="text-xl" to="/" :aria-label="siteConfig.title" style="color: white">
       <span>{{ siteConfig.title }}</span>
     </RouterLink>
     <div class="ml-6">
@@ -34,6 +34,6 @@ const themeConfig = useThemeConfig()
 
 <style scoped>
 .nav-link {
-  color: darkblue;
+  color: white;
 }
 </style>

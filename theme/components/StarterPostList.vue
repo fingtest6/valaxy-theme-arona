@@ -16,7 +16,9 @@ const posts = computed(() => props.posts || routes.value)
 </script>
 
 <template>
-  <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+  <ul
+    class="rounded-lg bg-gray-100/10 p-4 backdrop-blur-md divide-y divide-gray-200 dark:bg-gray-800/10 dark:divide-gray-700"
+  >
     <template v-for="post in posts" :key="post.path">
       <Transition name="fade">
         <li v-if="post" class="py-12">

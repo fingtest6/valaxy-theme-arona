@@ -24,7 +24,7 @@ defineProps<{
       </div>
       <div class="text-base font-medium leading-6">
         <RouterLink class="link" aria-label="read more" :to="post.path || ''">
-          Read more →
+          阅读更多 →
         </RouterLink>
       </div>
     </div>

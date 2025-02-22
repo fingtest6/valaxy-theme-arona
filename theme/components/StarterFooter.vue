@@ -33,6 +33,10 @@ function adjustFooterPosition() {
     // /posts/ 及其子页面：相对定位
     footer.style.position = 'relative'
   }
+  else if (route.path === '/allposts') {
+    // 主页：固定页脚
+    footer.style.position = 'relative'
+  }
   else {
     // 非主页时根据页面高度动态调整
     const pageHeight = document.documentElement.scrollHeight
