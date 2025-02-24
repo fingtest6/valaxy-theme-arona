@@ -21,7 +21,7 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
 
   <!-- 主内容容器 -->
   <article
-    class="relative mx-auto max-w-4xl rounded-2xl bg-white/80 p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 dark:bg-gray-800/90"
+    class="relative mx-auto mt-12 max-w-4xl rounded-2xl bg-white/80 p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 dark:bg-gray-800/90"
   >
     <!-- 文章头部 -->
     <header class="pt-6 text-center space-y-1 xl:pb-10">
@@ -35,7 +35,7 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
     </header>
 
     <!-- 文章主体 -->
-    <div class="pb-16 xl:grid xl:grid-cols-4 xl:gap-x-10 divide-y divide-gray-200 xl:pb-20 xl:divide-y-0 dark:divide-gray-600">
+    <div class="pb-16 xl:grid xl:grid-cols-4 xl:gap-x-10 xl:pb-20">
       <!-- 作者信息 -->
       <StarterAuthor
         v-if="frontmatter.author"
@@ -44,16 +44,16 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
       />
 
       <!-- 主要内容区域 -->
-      <div class="prose xl:col-span-3 xl:row-span-2 divide-y divide-gray-200 xl:pb-0 dark:prose-invert dark:divide-gray-600">
+      <div class="prose xl:col-span-3 xl:row-span-2">
         <slot />
       </div>
 
       <!-- 文章导航页脚 -->
-      <footer class="bg-transparent text-sm font-medium leading-5 xl:col-start-1 xl:row-start-2 divide-y divide-gray-200 dark:divide-gray-600">
+      <footer class="bg-transparent text-sm font-medium leading-5 xl:col-start-1 xl:row-start-2 xl:mt-10 space-y-6">
         <!-- 下一篇 -->
         <div v-if="nextPost && nextPost.path" class="py-8">
           <h2 class="text-xs text-gray-500 tracking-wide uppercase dark:text-gray-400">
-            Next Article
+            下一篇文章
           </h2>
           <div class="link">
             <RouterLink
@@ -68,7 +68,7 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
         <!-- 上一篇 -->
         <div v-if="prevPost && prevPost.path" class="py-8">
           <h2 class="text-xs text-gray-500 tracking-wide uppercase dark:text-gray-400">
-            Previous Article
+            上一篇文章
           </h2>
           <div class="link">
             <RouterLink
@@ -111,7 +111,7 @@ const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
 
 /* 强制所有文字继承容器颜色 */
 .prose,
-.prose * {
+.prose *:not(.gitalk-container):not(.gitalk-container *) {
   color: inherit !important;
 }
 </style>
