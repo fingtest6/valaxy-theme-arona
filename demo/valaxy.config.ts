@@ -15,12 +15,16 @@ export default defineConfig<ThemeConfig>({
 
     nav: [
       {
-        text: 'GitHub',
-        link: 'https://github.com/fingtest6/valaxy-theme-arona',
-      },
-      {
         text: '文章',
         link: '/allposts',
+      },
+      {
+        text: '友情链接',
+        link: '/link',
+      },
+      {
+        text: 'GitHub',
+        link: 'https://github.com/fingtest6/valaxy-theme-arona',
       },
       {
         text: 'Valaxy →',

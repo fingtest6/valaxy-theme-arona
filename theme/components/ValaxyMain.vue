@@ -28,7 +28,6 @@ const siteConfig = useSiteConfig()
               </ValaxyMd>
             </div>
             <div class="view-box container">
-              <content class="content" />
               <Gitalk v-if="AthemeConfig.clientID" />
             </div>
             <slot name="main-content-after" />

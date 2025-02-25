@@ -47,6 +47,7 @@ onMounted(() => {
     <div class="fixed inset-0 overflow-hidden -z-[999]">
       <img
         :src="appStore.isDark ? BG_NIGHT : BG_DAY"
+        alt="background"
         class="h-screen min-h-[600px] w-full scale-105 object-cover object-center transition-opacity duration-300"
         :class="{ 'opacity-80': appStore.isDark }" style="clip-path: inset(0 0 0 0)"
       >
