@@ -16,7 +16,6 @@ Here is the content of this draft
 
 ## Test
 
-
 Draft
 
 <!-- more -->

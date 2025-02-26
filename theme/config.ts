@@ -14,6 +14,18 @@ export const AthemeConfig = {
       avatar: './favicon.svg',
       link: '/',
     },
+    {
+      name: '本站',
+      desc: '示例2',
+      avatar: './favicon.svg',
+      link: '/',
+    },
+    {
+      name: '本站',
+      desc: '示例3',
+      avatar: './favicon.svg',
+      link: '/',
+    },
   ],
 } as const
 

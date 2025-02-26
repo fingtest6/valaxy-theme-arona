@@ -18,7 +18,7 @@ const links = ref([...AthemeConfig.links])
     <div class="friend-link-page">
       <!-- 链接列表 -->
       <div class="link-list">
-        <div v-for="link in links" :key="link.link" class="link-item">
+        <div v-for="link in links" :key="link.link" class="link-item mt-2">
           <a :href="link.link" target="_blank" rel="noopener" class="flex-container">
             <img :src="link.avatar" class="avatar" alt="avatar">
             <div class="text-content">
