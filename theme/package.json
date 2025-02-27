@@ -1,6 +1,6 @@
 {
   "name": "valaxy-theme-arona",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packageManager": "pnpm@9.5.0",
   "author": {
     "email": "stzr@rduteam.top",
@@ -23,10 +23,11 @@
   "dependencies": {
     "@iconify-json/ant-design": "^1.1.16",
     "@iconify-json/simple-icons": "^1.1.109",
+    "gitalk": "^1.8.0",
     "md5": "^2.3.0"
   },
   "devDependencies": {
     "@types/md5": "^2.3.5",
-    "valaxy": "^0.19.1"
+    "valaxy": "^0.22.12"
   }
 }
