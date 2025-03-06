@@ -6,6 +6,7 @@ export default defineTheme<ThemeConfig>((options) => {
   return {
     themeConfig: defaultThemeConfig,
     vite: {
+      assetsInclude: ['**/*.woff2'],
       plugins: [themePlugin(options)],
     },
     unocss: {

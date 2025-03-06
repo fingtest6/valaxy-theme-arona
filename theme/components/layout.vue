@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useAppStore } from 'valaxy'
-import BG_DAY from '../imgs/BG_AronaRoom.webp'
-import BG_NIGHT from '../imgs/BG_AronaRoom_Night.webp'
+import BG_DAY from '../assets/imgs/BG_AronaRoom.webp'
+import BG_NIGHT from '../assets/imgs/BG_AronaRoom_Night.webp'
 
 const appStore = useAppStore()
 onMounted(() => {
@@ -86,7 +86,7 @@ img {
 /* 你的原有样式保持不变，新增字体定义 */
 @font-face {
   font-family: 'MiSans';
-  src: url('fonts/MiSans-Normal.woff2') format('woff2');
+  src: url('../assets/fonts/MiSans-Normal.woff2') format('woff2');
   font-weight: 400;
 }
 
