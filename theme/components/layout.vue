@@ -83,4 +83,23 @@ img {
 .dark img {
   filter: brightness(0.8) contrast(1.1);
 }
+/* 你的原有样式保持不变，新增字体定义 */
+@font-face {
+  font-family: 'MiSans';
+  src: url('fonts/MiSans-Normal.woff2') format('woff2');
+  font-weight: 400;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+button,
+input {
+  font-family: 'MiSans', sans-serif !important;
+}
 </style>
