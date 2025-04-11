@@ -28,6 +28,6 @@
   },
   "devDependencies": {
     "@types/md5": "^2.3.5",
-    "valaxy": "^0.22.12"
+    "valaxy": "^0.22.17"
   }
 }
