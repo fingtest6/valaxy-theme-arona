@@ -1,4 +1,4 @@
-import type { ThemeConfig } from 'valaxy-theme-starter'
+import type { ThemeConfig } from 'valaxy-theme-arona'
 import { defineConfig } from 'valaxy'
 
 /**
@@ -6,7 +6,7 @@ import { defineConfig } from 'valaxy'
  * do not use export const config to avoid defu conflict
  */
 export default defineConfig<ThemeConfig>({
-  theme: 'starter',
+  theme: 'arona',
 
   themeConfig: {
     // colors: {
@@ -23,17 +23,13 @@ export default defineConfig<ThemeConfig>({
         link: 'https://starter.valaxy.site/atom.xml',
       },
       {
-        text: 'Discord',
-        link: 'https://discord.gg/sGe4U4p4CK',
-      },
-      {
         text: 'Valaxy →',
         link: 'https://github.com/YunYouJun/valaxy',
       },
     ],
 
     footer: {
-      since: 2016,
+      since: 2025,
     },
   },
 })

@@ -2,13 +2,13 @@ import { defineSiteConfig } from 'valaxy'
 
 export default defineSiteConfig({
   lang: 'zh-CN',
-  title: 'Valaxy Theme Starter',
-  url: 'https://starter.valaxy.site/',
+  title: 'Valaxy Theme Arona',
+  url: 'https://arona.demo.cjhcjh6.top/',
   author: {
     avatar: 'https://www.yunyoujun.cn/images/avatar.jpg',
-    name: '云游君',
+    name: '什亭之人',
   },
-  description: 'Valaxy Theme Starter Preview.',
+  description: 'Valaxy Theme Arona Preview.',
   social: [
     {
       name: 'RSS',
