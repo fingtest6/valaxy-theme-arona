@@ -29,6 +29,7 @@ declare module 'vue-router/auto-routes' {
     '/posts/i18n': RouteRecordInfo<'/posts/i18n', '/posts/i18n', Record<never, never>, Record<never, never>>,
     '/posts/markdown': RouteRecordInfo<'/posts/markdown', '/posts/markdown', Record<never, never>, Record<never, never>>,
     '/posts/test': RouteRecordInfo<'/posts/test', '/posts/test', Record<never, never>, Record<never, never>>,
+    '/posts/themetest': RouteRecordInfo<'/posts/themetest', '/posts/themetest', Record<never, never>, Record<never, never>>,
     '/tags/': RouteRecordInfo<'/tags/', '/tags', Record<never, never>, Record<never, never>>,
   }
 
@@ -47,7 +48,7 @@ declare module 'vue-router/auto-routes' {
       routes: '/'
       views: never
     }
-    '../node_modules/.pnpm/valaxy@0.26.6_@babel+parser_030a911229fa1dd5fc8b0a8e167ac274/node_modules/valaxy/client/pages/[...path].vue': {
+    '../node_modules/.pnpm/valaxy@0.26.6_@babel+parser_c1964f8b4f7215f85326e3f9eebc02e5/node_modules/valaxy/client/pages/[...path].vue': {
       routes: '/[...path]'
       views: never
     }
@@ -85,6 +86,10 @@ declare module 'vue-router/auto-routes' {
     }
     'pages/posts/test.md': {
       routes: '/posts/test'
+      views: never
+    }
+    'pages/posts/themetest.md': {
+      routes: '/posts/themetest'
       views: never
     }
     'pages/tags/index.md': {

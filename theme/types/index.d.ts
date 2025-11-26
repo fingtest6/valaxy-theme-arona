@@ -64,6 +64,8 @@ export interface ThemeConfig extends DefaultTheme.Config {
    * navbar
    */
   nav: NavItem[]
+
+  walineServerURL: string
 }
 
 export interface NavItem {
@@ -73,3 +75,9 @@ export interface NavItem {
 }
 
 export type ThemeUserConfig = Partial<ThemeConfig>
+
+declare module 'valaxy' {
+  interface SiteConfig {
+    themeConfig?: ThemeConfig
+  }
+}

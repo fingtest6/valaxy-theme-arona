@@ -16,11 +16,11 @@ export default defineConfig<ThemeConfig>({
     nav: [
       {
         text: 'GitHub',
-        link: 'https://github.com/YunYouJun/valaxy-theme-starter',
+        link: 'https://github.com/fingtest6/valaxy-theme-arona',
       },
       {
         text: 'RSS',
-        link: 'https://starter.valaxy.site/atom.xml',
+        link: 'https://arona.demo.cjhcjh6.top/atom.xml',
       },
       {
         text: 'Valaxy →',
@@ -31,5 +31,8 @@ export default defineConfig<ThemeConfig>({
     footer: {
       since: 2025,
     },
+    // themeConfig
+    // waline服务端地址
+    walineServerURL: 'https://waline.rduteam.top',
   },
 })

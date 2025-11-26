@@ -1,0 +1,34 @@
+<script setup>
+import { Waline } from '@waline/client/component'
+import { useSiteConfig } from "valaxy";
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { useThemeConfig } from '../composables'
+
+import '@waline/client/style'
+
+const themeConfig = useThemeConfig()
+const siteConfig = useSiteConfig()
+const serverURL = themeConfig.value.walineServerURL
+const path = computed(() => useRoute().path)
+
+// 添加评论功能开关控制
+const enableComment = computed(() => {
+  return siteConfig.value.comment?.enable ?? false
+})
+</script>
+
+<template>
+  <div v-if="enableComment && serverURL">
+    <Waline :server-u-r-l="serverURL" :path="path" />
+  </div>
+</template>
+
+<style>
+:root {
+  /* 字体大小和主题颜色 */
+  --waline-font-size: 16px;
+  --waline-theme-color: #0093ff;
+  --waline-active-color: #00b0ff;
+}
+</style>
