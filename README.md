@@ -1,7 +1,4 @@
 <p align="center">
-Valaxy-Theme-arona<sup><em>(vue)</em></sup>
-  
-该主题还在开发中,还未完工
+Valaxy-Theme-arona<sup><em>(vue)</em></sup> 早期版本
 
-## 使用方法
-emmm,等开发完吧qwq
+正在重构新版本中,此版本不可用
