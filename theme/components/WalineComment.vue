@@ -1,6 +1,6 @@
 <script setup>
 import { Waline } from '@waline/client/component'
-import { useSiteConfig } from "valaxy";
+import { useSiteConfig } from 'valaxy'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useThemeConfig } from '../composables'
@@ -30,5 +30,13 @@ const enableComment = computed(() => {
   --waline-font-size: 16px;
   --waline-theme-color: #0093ff;
   --waline-active-color: #00b0ff;
+}
+html.dark {
+  --waline-active-color: #002332;
+  --waline-info-bg-color: #858585;
+  --waline-info-color: #ffffff;
+  --waline-color: #ffffff;
+  --waline-bg-color: #555555;
+  --waline-border-color: #393939;
 }
 </style>
