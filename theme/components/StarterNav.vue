@@ -15,7 +15,7 @@ const themeConfig = useThemeConfig()
 </script>
 
 <template>
-  <nav w="full" class="flex items-center justify-between py-10 font-bold">
+  <nav w="full" class="flex items-center justify-between py-5 font-bold">
     <RouterLink class="text-xl" to="/" :aria-label="siteConfig.title">
       <img
         class="mr-2 inline-block"
@@ -25,7 +25,7 @@ const themeConfig = useThemeConfig()
       >
       <span class="hidden md:inline">{{ siteConfig.title }}</span>
     </RouterLink>
-    <div class="text-sm text-gray-500 leading-5">
+    <div class="text-sm leading-5">
       <template v-for="(item, i) in themeConfig.nav" :key="i">
         <AppLink
           :to="item.link"
