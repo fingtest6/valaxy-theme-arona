@@ -27,6 +27,6 @@
   },
   "devDependencies": {
     "@waline/client": "^3.4.1",
-    "valaxy": "^0.26.6"
+    "valaxy": "^0.28.5"
   }
 }

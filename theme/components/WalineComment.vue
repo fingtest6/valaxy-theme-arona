@@ -33,10 +33,11 @@ const enableComment = computed(() => {
 }
 html.dark {
   --waline-active-color: #002332;
-  --waline-info-bg-color: #858585;
+  --waline-info-bg-color: rgba(133, 133, 133, 0.55);
   --waline-info-color: #ffffff;
   --waline-color: #ffffff;
-  --waline-bg-color: #555555;
-  --waline-border-color: #393939;
+  --waline-bg-color: rgba(184, 9, 9, 0);
+  --waline-bg-color-light: rgba(0, 0, 0, 0.05);
+  --waline-border-color: rgba(0, 0, 0, 0.67);
 }
 </style>

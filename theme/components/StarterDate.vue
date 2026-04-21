@@ -15,7 +15,7 @@ const datetime = computed(() => formatDate(props.date || ''))
       Published on
     </dt>
     <dd class="text-base text-gray-500 font-medium leading-6">
-      <time :datetime="datetime">{{ datetime }}</time>
+      <time :datetime="datetime">修改时间:{{ datetime }}</time>
     </dd>
   </dl>
 </template>
