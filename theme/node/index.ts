@@ -6,6 +6,7 @@ import type { ThemeConfig } from '../types'
  * Default Config
  */
 export const defaultThemeConfig: ThemeConfig = {
+  walineServerURL: '',
   valaxyDarkOptions: {
     circleTransition: true,
   },

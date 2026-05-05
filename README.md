@@ -4,19 +4,20 @@ Valaxy-Theme-Arona<sup><em>(vue)</em></sup>
 
 [![npm dev dependency version](https://img.shields.io/npm/dependency-version/valaxy-theme-starter/dev/valaxy)](https://github.com/YunYouJun/valaxy)
 
-> 这是一个 [valaxy](https://github.com/YunYouJun/valaxy) 的主题,基于[starter](https://github.com/YunYouJun/valaxy-theme-starter)模板编写
+> 这是一个 [valaxy](https://github.com/YunYouJun/valaxy) 的主题，基于 [starter](https://github.com/YunYouJun/valaxy-theme-starter) 模板编写
 
 [在线预览](https://arona.demo.cjhcjh6.top/)
+
 ## 注意事项
 
-❗ Valaxy-Theme-Arona目前还在开发中,请谨慎使用！
-
-
+❗ Valaxy-Theme-Arona 目前还在开发中，请谨慎使用！
 
 ## 安装方法
+
 敬请期待
 
 ## TODO
+
 - [x] 评论
 - [ ] 个性化更改
 - [x] 黑暗主题适配
@@ -25,7 +26,9 @@ Valaxy-Theme-Arona<sup><em>(vue)</em></sup>
 - [ ] 搜索功能
 - [x] 图标
 - [ ] 编写安装方法
-- [ ] 添加阿罗娜spine
+- [ ] 添加阿罗娜 spine
+
 ## 感谢
+
 - [Valaxy](https://github.com/YunYouJun/valaxy)
 - [valaxy-theme-starter](https://github.com/valaxyjs/valaxy-theme-starter)

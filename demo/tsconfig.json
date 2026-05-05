@@ -10,7 +10,7 @@
     "types": [
       "vite/client",
       "valaxy/client",
-      "vite-plugin-vue-layouts/client",
+      "vite-plugin-vue-layouts-next/client",
       "unplugin-vue-router/client"
     ],
     "strict": true,

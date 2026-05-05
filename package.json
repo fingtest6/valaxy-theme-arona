@@ -13,6 +13,9 @@
     "release": "cd theme && git add -A && bumpp --all",
     "typecheck": "vue-tsc --noEmit --skipLibCheck"
   },
+  "dependencies": {
+    "valaxy": "^0.28.6"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^5.4.1",
     "@unocss/eslint-plugin": "^66.5.3",
@@ -20,11 +23,9 @@
     "eslint": "^9.37.0",
     "eslint-plugin-format": "^1.0.2",
     "typescript": "^5.9.3",
+    "unocss": "^0.62.0",
     "valaxy-theme-arona": "workspace:*",
     "vitest": "^3.2.4",
     "vue-tsc": "^3.1.1"
-  },
-  "dependencies": {
-    "valaxy": "^0.28.5"
   }
 }

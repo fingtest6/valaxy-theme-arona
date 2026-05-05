@@ -118,7 +118,7 @@ function handleImageError(e: Event) {
         <!-- 📝 摘要预览（使用计算属性，避免模板内复杂逻辑） -->
         <div
           v-if="excerptPreview"
-          class="max-w-none text-gray-600 prose prose-sm dark:text-gray-300 dark:prose-invert"
+          class="prose-sm max-w-none text-gray-600 prose dark:text-gray-300 dark:prose-invert"
           v-html="post.excerpt || excerptPreview"
         />
       </div>
