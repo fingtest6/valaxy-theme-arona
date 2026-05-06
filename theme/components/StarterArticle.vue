@@ -1,5 +1,4 @@
-<script setup lang="ts">
-import { useFrontmatter, usePostList } from 'valaxy'
+<script setup lang="ts">import { useFrontmatter, usePostList } from 'valaxy'
 import { computed } from 'vue'
 
 import { useRoute } from 'vue-router'
@@ -10,11 +9,23 @@ const route = useRoute()
 const posts = usePostList()
 
 function findCurrentIndex() {
+  if (!route || !route.path)
+    return -1
   return posts.value.findIndex(p => p.path === route.path)
 }
 
-const nextPost = computed(() => posts.value[findCurrentIndex() - 1])
-const prevPost = computed(() => posts.value[findCurrentIndex() + 1])
+const nextPost = computed(() => {
+  const index = findCurrentIndex()
+  if (index < 0)
+    return undefined
+  return posts.value[index - 1]
+})
+const prevPost = computed(() => {
+  const index = findCurrentIndex()
+  if (index < 0)
+    return undefined
+  return posts.value[index + 1]
+})
 </script>
 
 <template>

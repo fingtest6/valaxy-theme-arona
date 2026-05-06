@@ -19,7 +19,6 @@ const isThisYear = computed(() => {
 })
 
 const poweredHtml = computed(() => t('footer.powered', [`<a href="${pkg.repository}" target="_blank" rel="noopener">Valaxy</a> v${pkg.version}`]))
-const footerIcon = computed(() => themeConfig.value.footer.icon!)
 </script>
 
 <template>
@@ -36,12 +35,8 @@ const footerIcon = computed(() => themeConfig.value.footer.icon!)
         <template v-if="!isThisYear">
           {{ themeConfig.footer.since }} -
         </template>
-        {{ year }}
+        {{ year }}-
       </span>
-
-      <a m="x-2" class="inline-flex animate-pulse" :href="footerIcon.url" target="_blank" :title="footerIcon.title">
-        <div :class="footerIcon.name" />
-      </a>
 
       <span>{{ siteConfig.author.name }}</span>
     </div>

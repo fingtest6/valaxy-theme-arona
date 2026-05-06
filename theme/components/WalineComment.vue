@@ -10,8 +10,8 @@ import '@waline/client/style'
 const themeConfig = useThemeConfig()
 const siteConfig = useSiteConfig()
 const serverURL = themeConfig.value.walineServerURL
-const path = computed(() => useRoute().path)
-
+const route = useRoute()
+const path = computed(() => route?.path || '')
 // 添加评论功能开关控制
 const enableComment = computed(() => {
   return siteConfig.value.comment?.enable ?? false

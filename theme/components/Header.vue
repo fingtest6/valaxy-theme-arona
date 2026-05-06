@@ -13,7 +13,7 @@ const siteConfig = useSiteConfig()
         {{ siteConfig.title }}
       </h1>
       <p class="text-lg text-gray-500 leading-7">
-        {{ siteConfig.subtitle }}
+        {{ siteConfig.description }}
       </p>
     </div>
   </div>
