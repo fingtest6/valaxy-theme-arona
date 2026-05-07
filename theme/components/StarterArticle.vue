@@ -1,4 +1,5 @@
-<script setup lang="ts">import { useFrontmatter, usePostList } from 'valaxy'
+<script setup lang="ts">
+import { useFrontmatter, usePostList } from 'valaxy'
 import { computed } from 'vue'
 
 import { useRoute } from 'vue-router'

@@ -18,7 +18,7 @@ const isThisYear = computed(() => {
   return year === themeConfig.value.footer.since
 })
 
-const poweredHtml = computed(() => t('footer.powered', [`<a href="${pkg.repository}" target="_blank" rel="noopener">Valaxy</a> v${pkg.version}`]))
+const poweredHtml = computed(() => t('footer.powered', [`<a href="https://valaxy.site/" target="_blank" rel="noopener">Valaxy</a> v${pkg.version}`]))
 </script>
 
 <template>

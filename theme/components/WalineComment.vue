@@ -11,8 +11,16 @@ const themeConfig = useThemeConfig()
 const siteConfig = useSiteConfig()
 const serverURL = themeConfig.value.walineServerURL
 const route = useRoute()
-const path = computed(() => route?.path || '')
-// 添加评论功能开关控制
+const path = computed(() => {
+  const baseUrl = siteConfig.value.url || ''
+  const currentPath = route?.path || ''
+  if (baseUrl && currentPath) {
+    const cleanBase = baseUrl.replace(/\/$/, '')
+    const cleanPath = currentPath.startsWith('/') ? currentPath : `/${currentPath}`
+    return `${cleanBase}${cleanPath}`
+  }
+  return currentPath || window.location?.href || ''
+})
 const enableComment = computed(() => {
   return siteConfig.value.comment?.enable ?? false
 })
