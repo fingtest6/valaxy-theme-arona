@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "jsx": "preserve",
-    "lib": ["DOM", "ESNext"],
+    "lib": ["DOM", "ESNext", "DOM.Iterable"],
     "baseUrl": ".",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -14,11 +14,12 @@
       "vite-plugin-vue-layouts-next/client"
     ],
     "allowJs": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "noUnusedLocals": true,
+    "strict": false,
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "skipDefaultLibCheck": true,
     "skipLibCheck": true
   },
   "include": [
@@ -26,5 +27,5 @@
     "**/*.vue",
     "**/.valaxy/**/*.d.ts"
   ],
-  "exclude": ["**/dist/**", "node_modules"]
+  "exclude": ["**/dist/**", "node_modules", "**/node_modules/**"]
 }

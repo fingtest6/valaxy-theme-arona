@@ -1,11 +1,7 @@
-<template>
-  <Layout>
-    <div class="divide-y divide-gray-200 dark:divide-gray-700">
-      <Header />
+<script setup lang="ts">
+import Desktop from '../components/Desktop.vue'
+</script>
 
-      <slot>
-        <RouterView />
-      </slot>
-    </div>
-  </Layout>
+<template>
+  <Desktop />
 </template>

@@ -1,8 +1,7 @@
+<script setup lang="ts">
+import Desktop from '../components/Desktop.vue'
+</script>
+
 <template>
-  <Layout>
-    <StarterArticle>
-      <RouterView />
-      <WalineComment />
-    </StarterArticle>
-  </Layout>
+  <Desktop />
 </template>

@@ -10,7 +10,6 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "valaxy": "^0.28.6",
-    "valaxy-theme-arona": "workspace:*"
+    "valaxy": "^1.0.0-rc.5"
   }
 }

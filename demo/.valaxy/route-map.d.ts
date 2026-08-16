@@ -100,6 +100,20 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/posts/markdown2': RouteRecordInfo<
+      '/posts/markdown2',
+      '/posts/markdown2',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/markdown3': RouteRecordInfo<
+      '/posts/markdown3',
+      '/posts/markdown3',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/posts/test': RouteRecordInfo<
       '/posts/test',
       '/posts/test',
@@ -140,7 +154,7 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    '../node_modules/.pnpm/valaxy@0.28.6_@babel+parser_8c19b91bdb27dac545472366e5b2f928/node_modules/valaxy/client/pages/[...path].vue': {
+    '../node_modules/.pnpm/valaxy@1.0.0-rc.5_@babel+pa_acc7d5a296ef4e3de90a7b9159c3bd64/node_modules/valaxy/client/pages/[...path].vue': {
       routes:
         | '/[...path]'
       views:
@@ -191,6 +205,18 @@ declare module 'vue-router/auto-routes' {
     'pages/posts/markdown.md': {
       routes:
         | '/posts/markdown'
+      views:
+        | never
+    }
+    'pages/posts/markdown2.md': {
+      routes:
+        | '/posts/markdown2'
+      views:
+        | never
+    }
+    'pages/posts/markdown3.md': {
+      routes:
+        | '/posts/markdown3'
       views:
         | never
     }

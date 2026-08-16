@@ -6,6 +6,10 @@
 :root {
   --un-prose-links: var(--st-c-link);
 
+  --st-menubar-h: 30px;
+  --st-dock-h: 84px;
+  --st-accent: var(--st-c-brand);
+
   @include set-css-var-from-map($common);
   @include set-css-var-from-map($z-index, 'z');
 }
