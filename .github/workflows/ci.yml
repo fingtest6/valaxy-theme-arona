@@ -3,11 +3,11 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - OS-Test
 
   pull_request:
     branches:
-      - main
+      - OS-Test
 
 jobs:
   lint:
