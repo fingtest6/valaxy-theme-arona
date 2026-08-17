@@ -391,6 +391,21 @@ html.dark .mac-window__titlebar {
   left: 0;
   cursor: nesw-resize;
 }
+
+/* 移动端：隐藏交通灯、精简标题栏 */
+@media (max-width: 768px) {
+  .mac-window__lights {
+    display: none;
+  }
+
+  .mac-window__titlebar {
+    height: 36px;
+  }
+
+  .mac-window__title {
+    font-size: 12px;
+  }
+}
 </style>
 
 <style>

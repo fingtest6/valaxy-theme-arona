@@ -28,6 +28,12 @@ if (import.meta.env.SSR)
 
 const isArticleRoute = computed(() => route.path.startsWith('/posts/'))
 
+// 移动端仅支持全屏模式
+const isMobile = computed(() => appStore.isMobile)
+const effectiveMode = computed(() =>
+  isMobile.value ? 'fullscreen' : desktop.displayMode.value,
+)
+
 const appComponents: Record<string, any> = {
   articles: ArticlesApp,
   archive: ArchiveApp,
@@ -85,7 +91,7 @@ function routeToPost() {
 function syncWindows(openHomeWindow: boolean) {
   if (isArticleRoute.value) {
     const title = resolveTitle((route.meta as any)?.frontmatter?.title) || '文章'
-    if (desktop.displayMode.value === 'fullscreen') {
+    if (effectiveMode.value === 'fullscreen') {
       // 全屏：打开/保留阅读器并更新标题
       if (!desktop.readerWindow.value)
         desktop.openReader()
@@ -102,7 +108,7 @@ function syncWindows(openHomeWindow: boolean) {
   }
   else {
     // 首页
-    if (desktop.displayMode.value === 'fullscreen') {
+    if (effectiveMode.value === 'fullscreen') {
       const rw = desktop.readerWindow.value
       if (rw) {
         rw.title = '文章'
@@ -119,6 +125,7 @@ function syncWindows(openHomeWindow: boolean) {
 
 watch(() => route.path, () => syncWindows(false), { immediate: true })
 watch(() => desktop.displayMode.value, () => syncWindows(true))
+watch(() => isMobile.value, () => syncWindows(true))
 
 onMounted(() => {
   // 挂载后应用 localStorage 中保存的显示模式（避免与 SSG 首屏水合冲突）

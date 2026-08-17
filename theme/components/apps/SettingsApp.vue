@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAppStore, useLocale, useSiteConfig } from 'valaxy'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDesktop } from '../../composables/desktop'
 
@@ -8,6 +9,8 @@ const desktop = useDesktop()
 const siteConfig = useSiteConfig()
 const { toggleLocales } = useLocale()
 const { locale } = useI18n()
+
+const isMobile = computed(() => appStore.isMobile)
 
 const ACCENTS = [
   { name: '蓝色', value: '#0078E7' },
@@ -38,7 +41,9 @@ function toggleDark(e: MouseEvent) {
 <template>
   <div class="settings-app">
     <div class="settings-app__group">
-      <h3 class="settings-app__heading">外观</h3>
+      <h3 class="settings-app__heading">
+        外观
+      </h3>
 
       <div class="setting-row">
         <div class="setting-row__label">
@@ -75,8 +80,10 @@ function toggleDark(e: MouseEvent) {
       </div>
     </div>
 
-    <div class="settings-app__group">
-      <h3 class="settings-app__heading">文章</h3>
+    <div v-if="!isMobile" class="settings-app__group">
+      <h3 class="settings-app__heading">
+        文章
+      </h3>
 
       <div class="setting-row">
         <div class="setting-row__label">
@@ -105,7 +112,9 @@ function toggleDark(e: MouseEvent) {
     </div>
 
     <div v-if="showLocale" class="settings-app__group">
-      <h3 class="settings-app__heading">语言</h3>
+      <h3 class="settings-app__heading">
+        语言
+      </h3>
       <div class="setting-row">
         <div class="setting-row__label">
           <span class="setting-row__title">切换语言</span>
@@ -119,7 +128,7 @@ function toggleDark(e: MouseEvent) {
     </div>
 
     <div class="settings-app__footer">
-      <p>valaxy-theme-arona · macOS 风格主题</p>
+      <p>valaxy-theme-arona</p>
     </div>
   </div>
 </template>
@@ -237,7 +246,9 @@ html.dark .setting-row__hint {
   border-radius: 50%;
   border: 3px solid transparent;
   cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .accent-dot:hover {

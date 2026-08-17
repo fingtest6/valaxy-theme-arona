@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { useAppStore } from 'valaxy'
 import { computed } from 'vue'
 import { APPS, useDesktop } from '../composables/desktop'
 
 const desktop = useDesktop()
+const appStore = useAppStore()
+
+const isMobile = computed(() => appStore.isMobile)
 
 const APP_COLORS: Record<string, string> = {
   articles: 'linear-gradient(135deg, #2f80ed, #56ccf2)',
@@ -17,8 +21,8 @@ const autoHide = computed(() =>
 )
 
 function onClick(appId: string) {
-  // 文章应用：全屏模式打开阅读器，窗口模式打开列表
-  const isReaderTarget = appId === 'articles' && desktop.displayMode.value === 'fullscreen'
+  // 文章应用：全屏模式（或移动端）打开阅读器，窗口模式打开列表
+  const isReaderTarget = appId === 'articles' && (isMobile.value || desktop.displayMode.value === 'fullscreen')
   const targetApp = isReaderTarget ? 'reader' : appId
 
   const existing = desktop.windows.value.find(w => w.app === targetApp)
@@ -41,7 +45,7 @@ function onClick(appId: string) {
 </script>
 
 <template>
-  <div class="dock" :class="{ 'is-auto-hide': autoHide }">
+  <div class="dock" :class="{ 'is-auto-hide': autoHide, 'is-mobile': isMobile }">
     <div class="dock__inner">
       <button
         v-for="app in APPS"
@@ -168,5 +172,22 @@ html.dark .dock__inner {
 
 html.dark .dock__dot.is-active {
   background: rgba(230, 230, 240, 0.9);
+}
+
+/* 移动端 Dock 缩小 */
+.dock.is-mobile {
+  height: 66px;
+}
+
+.dock.is-mobile .dock__inner {
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+.dock.is-mobile .dock__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  font-size: 24px;
 }
 </style>

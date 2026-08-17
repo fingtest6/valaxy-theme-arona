@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { Post } from 'valaxy'
+import { useAppStore } from 'valaxy'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import ArticleList from './ArticleList.vue'
 
@@ -15,20 +17,25 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+const appStore = useAppStore()
+const isMobile = computed(() => appStore.isMobile)
 
 function openPost(post: Post) {
   router.push(post.path || '/')
 }
+
+function goBack() {
+  router.push('/')
+}
 </script>
 
 <template>
-  <div class="reader">
-    <!-- 左：文章列表 -->
+  <!-- 桌面端：三栏布局 -->
+  <div v-if="!isMobile" class="reader">
     <aside class="reader__list">
       <ArticleList @open="openPost" />
     </aside>
 
-    <!-- 中：文章内容 -->
     <section class="reader__content">
       <div v-if="component" class="reader__content-scroll">
         <component :is="component" />
@@ -42,7 +49,6 @@ function openPost(post: Post) {
       </div>
     </section>
 
-    <!-- 右：评论 -->
     <aside v-if="currentPath" class="reader__comments">
       <div class="reader__comments-scroll">
         <div class="reader__comments-title">
@@ -52,6 +58,36 @@ function openPost(post: Post) {
         <WalineComment :path="currentPath" />
       </div>
     </aside>
+  </div>
+
+  <!-- 移动端：单栏，列表 → 文章 -->
+  <div v-else class="reader reader--mobile">
+    <div v-if="!currentPath" class="reader__list reader__list--mobile">
+      <ArticleList @open="openPost" />
+    </div>
+
+    <template v-else>
+      <div class="reader__mobile-bar">
+        <button class="reader__back" @click="goBack">
+          <i i-ri-arrow-left-line />
+          返回列表
+        </button>
+      </div>
+
+      <section class="reader__content reader__content--mobile">
+        <div class="reader__content-scroll reader__content-scroll--mobile">
+          <component :is="component" />
+        </div>
+      </section>
+
+      <aside class="reader__comments reader__comments--mobile">
+        <div class="reader__comments-title">
+          <i i-ri-chat-3-line />
+          评论
+        </div>
+        <WalineComment :path="currentPath" />
+      </aside>
+    </template>
   </div>
 </template>
 
@@ -161,5 +197,70 @@ html.dark .reader__comments {
   font-weight: 700;
   color: var(--va-c-text, #333);
   margin-bottom: 8px;
+}
+
+/* ---------- 移动端 ---------- */
+.reader--mobile {
+  flex-direction: column;
+}
+
+.reader__list--mobile {
+  width: 100%;
+  border-right: none;
+  flex: 1;
+  min-height: 0;
+}
+
+.reader__mobile-bar {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+html.dark .reader__mobile-bar {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.reader__back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--va-c-text, #333);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+html.dark .reader__back {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.reader__content--mobile {
+  flex: 1;
+  min-height: 0;
+}
+
+.reader__content-scroll--mobile {
+  padding: 20px 18px 32px;
+}
+
+.reader__comments--mobile {
+  width: 100%;
+  border-left: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  max-height: 40%;
+  overflow-y: auto;
+  padding: 16px 18px;
+  flex-shrink: 0;
+}
+
+html.dark .reader__comments--mobile {
+  border-top-color: rgba(255, 255, 255, 0.08);
 }
 </style>

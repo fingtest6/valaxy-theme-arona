@@ -87,6 +87,13 @@ function centerCoords(width: number, height: number) {
   }
 }
 
+/**
+ * 移动端视口（与 useMobile 的 768px 断点保持一致）
+ */
+function isMobileViewport() {
+  return typeof window !== 'undefined' && window.innerWidth <= 768
+}
+
 function focus(id: string) {
   if (!id)
     return
@@ -128,10 +135,12 @@ export function useDesktop() {
     const existing = findAppWindow(app)
     if (existing) {
       existing.minimized = false
+      existing.maximized = isMobileViewport() || existing.maximized
       focus(existing.id)
       return existing
     }
-    const { x, y } = centerCoords(meta.defaultWidth, meta.defaultHeight)
+    const mobile = isMobileViewport()
+    const { x, y } = mobile ? { x: 0, y: 0 } : centerCoords(meta.defaultWidth, meta.defaultHeight)
     const win: DesktopWindow = {
       id: createId(app),
       app,
@@ -143,7 +152,7 @@ export function useDesktop() {
       height: meta.defaultHeight,
       z: 0,
       minimized: false,
-      maximized: false,
+      maximized: mobile,
     }
     state.windows.push(win)
     focus(win.id)
