@@ -14,7 +14,7 @@
     "typecheck": "vue-tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
-    "valaxy": "^1.0.0-rc.5"
+    "valaxy": "^1.0.0-rc.8"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.4.1",

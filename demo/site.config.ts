@@ -26,6 +26,12 @@ export default defineSiteConfig({
   comment: {
     enable: true,
   },
+  // 搜索索引：包含文章全文，以便按正文关键词搜索
+  fuse: {
+    options: {
+      keys: ['title', 'tags', 'categories', 'excerpt', 'content'],
+    },
+  },
   themeConfig: {
     colors: {
       primary: '#0070f3',

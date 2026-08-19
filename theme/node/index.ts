@@ -112,6 +112,8 @@ export function generateSafelist(themeConfig: ThemeConfig) {
     'i-ri-chat-3-line',
     'i-ri-layout-2-line',
     'i-ri-window-line',
+    'i-ri-file-search-line',
+    'i-ri-loader-4-line',
   ]
   safelist.push(...appIcons)
 

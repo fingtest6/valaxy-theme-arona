@@ -1,7 +1,7 @@
 import type { Post } from 'valaxy'
 import { computed, reactive } from 'vue'
 
-export type AppId = 'articles' | 'archive' | 'friends' | 'about' | 'settings'
+export type AppId = 'articles' | 'archive' | 'search' | 'friends' | 'about' | 'settings'
 
 export type ArticleDisplayMode = 'fullscreen' | 'window'
 
@@ -41,6 +41,7 @@ export interface AppMeta {
 export const APPS: AppMeta[] = [
   { id: 'articles', title: '文章', icon: 'i-ri-file-list-3-line', defaultWidth: 560, defaultHeight: 640 },
   { id: 'archive', title: '归档', icon: 'i-ri-archive-line', defaultWidth: 640, defaultHeight: 620 },
+  { id: 'search', title: '搜索', icon: 'i-ri-search-line', defaultWidth: 600, defaultHeight: 620 },
   { id: 'friends', title: '友链', icon: 'i-ri-links-line', defaultWidth: 560, defaultHeight: 560 },
   { id: 'about', title: '关于', icon: 'i-ri-information-line', defaultWidth: 520, defaultHeight: 520 },
 ]
@@ -94,6 +95,20 @@ function isMobileViewport() {
   return typeof window !== 'undefined' && window.innerWidth <= 768
 }
 
+/**
+ * 将窗口尺寸限制在视口内，避免小屏下窗口超出屏幕
+ */
+function clampToViewport(width: number, height: number) {
+  if (typeof window === 'undefined')
+    return { width, height }
+  const maxW = Math.max(320, window.innerWidth - 32)
+  const maxH = Math.max(240, window.innerHeight - 140)
+  return {
+    width: Math.min(width, maxW),
+    height: Math.min(height, maxH),
+  }
+}
+
 function focus(id: string) {
   if (!id)
     return
@@ -140,7 +155,8 @@ export function useDesktop() {
       return existing
     }
     const mobile = isMobileViewport()
-    const { x, y } = mobile ? { x: 0, y: 0 } : centerCoords(meta.defaultWidth, meta.defaultHeight)
+    const { width, height } = clampToViewport(meta.defaultWidth, meta.defaultHeight)
+    const { x, y } = mobile ? { x: 0, y: 0 } : centerCoords(width, height)
     const win: DesktopWindow = {
       id: createId(app),
       app,
@@ -148,8 +164,8 @@ export function useDesktop() {
       icon: meta.icon,
       x,
       y,
-      width: meta.defaultWidth,
-      height: meta.defaultHeight,
+      width,
+      height,
       z: 0,
       minimized: false,
       maximized: mobile,
@@ -170,7 +186,8 @@ export function useDesktop() {
       focus(existing.id)
       return existing
     }
-    const { x, y } = centerCoords(1080, 700)
+    const { width, height } = clampToViewport(1080, 700)
+    const { x, y } = centerCoords(width, height)
     const win: DesktopWindow = {
       id: createId('reader'),
       app: 'reader',
@@ -178,8 +195,8 @@ export function useDesktop() {
       icon: 'i-ri-file-list-3-line',
       x,
       y,
-      width: 1080,
-      height: 700,
+      width,
+      height,
       z: 0,
       minimized: false,
       maximized: true,
@@ -201,7 +218,8 @@ export function useDesktop() {
       focus(existing.id)
       return existing
     }
-    const { x, y } = centerCoords(760, 640)
+    const { width, height } = clampToViewport(760, 640)
+    const { x, y } = centerCoords(width, height)
     const win: DesktopWindow = {
       id: createId('article'),
       app: 'article',
@@ -209,8 +227,8 @@ export function useDesktop() {
       icon: 'i-ri-file-text-line',
       x,
       y,
-      width: 760,
-      height: 640,
+      width,
+      height,
       z: 0,
       minimized: false,
       maximized: false,

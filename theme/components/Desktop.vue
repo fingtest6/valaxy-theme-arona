@@ -5,12 +5,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { useThemeConfig } from '../composables'
 import type { DesktopWindow } from '../composables/desktop'
 import { resolveTitle, useDesktop } from '../composables/desktop'
+import { useIsMobile } from '../composables/useIsMobile'
 import AboutApp from './apps/AboutApp.vue'
 import ArchiveApp from './apps/ArchiveApp.vue'
 import ArticleApp from './apps/ArticleApp.vue'
 import ArticlesApp from './apps/ArticlesApp.vue'
 import FriendsApp from './apps/FriendsApp.vue'
 import ReaderApp from './apps/ReaderApp.vue'
+import SearchApp from './apps/SearchApp.vue'
 import SettingsApp from './apps/SettingsApp.vue'
 import Dock from './Dock.vue'
 import MenuBar from './MenuBar.vue'
@@ -29,7 +31,7 @@ if (import.meta.env.SSR)
 const isArticleRoute = computed(() => route.path.startsWith('/posts/'))
 
 // 移动端仅支持全屏模式
-const isMobile = computed(() => appStore.isMobile)
+const isMobile = useIsMobile()
 const effectiveMode = computed(() =>
   isMobile.value ? 'fullscreen' : desktop.displayMode.value,
 )
@@ -37,6 +39,7 @@ const effectiveMode = computed(() =>
 const appComponents: Record<string, any> = {
   articles: ArticlesApp,
   archive: ArchiveApp,
+  search: SearchApp,
   friends: FriendsApp,
   about: AboutApp,
   settings: SettingsApp,
@@ -92,7 +95,8 @@ function syncWindows(openHomeWindow: boolean) {
   if (isArticleRoute.value) {
     const title = resolveTitle((route.meta as any)?.frontmatter?.title) || '文章'
     if (effectiveMode.value === 'fullscreen') {
-      // 全屏：打开/保留阅读器并更新标题
+      // 全屏：关闭所有文章窗口，打开/保留阅读器并更新标题
+      desktop.articleWindows.value.slice().forEach(w => desktop.closeWindow(w.id))
       if (!desktop.readerWindow.value)
         desktop.openReader()
       const rw = desktop.readerWindow.value
@@ -109,6 +113,8 @@ function syncWindows(openHomeWindow: boolean) {
   else {
     // 首页
     if (effectiveMode.value === 'fullscreen') {
+      // 全屏首页：关闭所有文章窗口，保留/打开阅读器
+      desktop.articleWindows.value.slice().forEach(w => desktop.closeWindow(w.id))
       const rw = desktop.readerWindow.value
       if (rw) {
         rw.title = '文章'

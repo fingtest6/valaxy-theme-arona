@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useAppStore, useLocale, useSiteConfig } from 'valaxy'
-import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDesktop } from '../../composables/desktop'
+import { useIsMobile } from '../../composables/useIsMobile'
 
 const appStore = useAppStore()
 const desktop = useDesktop()
@@ -10,7 +10,7 @@ const siteConfig = useSiteConfig()
 const { toggleLocales } = useLocale()
 const { locale } = useI18n()
 
-const isMobile = computed(() => appStore.isMobile)
+const isMobile = useIsMobile()
 
 const ACCENTS = [
   { name: '蓝色', value: '#0078E7' },

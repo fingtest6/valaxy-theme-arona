@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { Post } from 'valaxy'
-import { useAppStore } from 'valaxy'
-import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useIsMobile } from '../../composables/useIsMobile'
 import ArticleList from './ArticleList.vue'
 
 const props = defineProps<{
@@ -17,8 +16,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
-const appStore = useAppStore()
-const isMobile = computed(() => appStore.isMobile)
+const isMobile = useIsMobile()
 
 function openPost(post: Post) {
   router.push(post.path || '/')
@@ -74,19 +72,20 @@ function goBack() {
         </button>
       </div>
 
-      <section class="reader__content reader__content--mobile">
-        <div class="reader__content-scroll reader__content-scroll--mobile">
+      <!-- 正文与评论在同一滚动容器内，跟随滚动 -->
+      <div class="reader__mobile-scroll">
+        <div class="reader__content reader__content--mobile">
           <component :is="component" />
         </div>
-      </section>
 
-      <aside class="reader__comments reader__comments--mobile">
-        <div class="reader__comments-title">
-          <i i-ri-chat-3-line />
-          评论
-        </div>
-        <WalineComment :path="currentPath" />
-      </aside>
+        <aside class="reader__comments reader__comments--mobile">
+          <div class="reader__comments-title">
+            <i i-ri-chat-3-line />
+            评论
+          </div>
+          <WalineComment :path="currentPath" />
+        </aside>
+      </div>
     </template>
   </div>
 </template>
@@ -127,6 +126,7 @@ html.dark .reader__list {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 32px 44px 56px;
 }
 
@@ -186,6 +186,7 @@ html.dark .reader__comments {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px;
 }
 
@@ -241,23 +242,23 @@ html.dark .reader__back {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.reader__content--mobile {
+/* 正文与评论共用的滚动容器 */
+.reader__mobile-scroll {
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.reader__content-scroll--mobile {
-  padding: 20px 18px 32px;
+.reader__content--mobile {
+  padding: 20px 18px 8px;
 }
 
 .reader__comments--mobile {
   width: 100%;
   border-left: none;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
-  max-height: 40%;
-  overflow-y: auto;
-  padding: 16px 18px;
-  flex-shrink: 0;
+  padding: 16px 18px 32px;
 }
 
 html.dark .reader__comments--mobile {

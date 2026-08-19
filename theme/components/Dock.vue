@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { useAppStore } from 'valaxy'
 import { computed } from 'vue'
 import { APPS, useDesktop } from '../composables/desktop'
+import { useIsMobile } from '../composables/useIsMobile'
 
 const desktop = useDesktop()
-const appStore = useAppStore()
-
-const isMobile = computed(() => appStore.isMobile)
+const isMobile = useIsMobile()
 
 const APP_COLORS: Record<string, string> = {
   articles: 'linear-gradient(135deg, #2f80ed, #56ccf2)',
   archive: 'linear-gradient(135deg, #f2994a, #f2c94c)',
+  search: 'linear-gradient(135deg, #6366f1, #818cf8)',
   friends: 'linear-gradient(135deg, #9b51e0, #bb6bd9)',
   about: 'linear-gradient(135deg, #27ae60, #6fcf97)',
 }

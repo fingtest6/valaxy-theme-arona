@@ -21,6 +21,7 @@ html.dark {
 .markdown-body {
   padding-top: 0.5rem;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 
   h1,
   h2,
@@ -65,5 +66,18 @@ html.dark {
     &::after {
       content: none;
     }
+  }
+
+  /* 防止宽内容（长代码、表格、图片）撑破容器导致横向滚动 */
+  img,
+  table,
+  pre,
+  iframe,
+  video {
+    max-width: 100%;
+  }
+
+  pre {
+    overflow-x: auto;
   }
 }
