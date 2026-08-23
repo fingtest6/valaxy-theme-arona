@@ -12,11 +12,18 @@ const APP_COLORS: Record<string, string> = {
   search: 'linear-gradient(135deg, #6366f1, #818cf8)',
   friends: 'linear-gradient(135deg, #9b51e0, #bb6bd9)',
   about: 'linear-gradient(135deg, #27ae60, #6fcf97)',
+  browser: 'linear-gradient(135deg, #00b4d8, #90e0ef)',
 }
 
 // 有窗口处于最大化/全屏状态时，Dock 自动向下隐藏
 const autoHide = computed(() =>
   desktop.windows.value.some(w => !w.minimized && w.maximized),
+)
+
+const dockApps = computed(() =>
+  desktop.browserUnlocked.value
+    ? APPS
+    : APPS.filter(a => a.id !== 'browser'),
 )
 
 function onClick(appId: string) {
@@ -47,7 +54,7 @@ function onClick(appId: string) {
   <div class="dock" :class="{ 'is-auto-hide': autoHide, 'is-mobile': isMobile }">
     <div class="dock__inner">
       <button
-        v-for="app in APPS"
+        v-for="app in dockApps"
         :key="app.id"
         class="dock__item"
         :title="app.title"

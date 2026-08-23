@@ -114,6 +114,12 @@ export function generateSafelist(themeConfig: ThemeConfig) {
     'i-ri-window-line',
     'i-ri-file-search-line',
     'i-ri-loader-4-line',
+    'i-ri-globe-line',
+    'i-ri-apple-line',
+    'i-ri-windows-line',
+    'i-ri-refresh-line',
+    'i-ri-lock-line',
+    'i-ri-home-line',
   ]
   safelist.push(...appIcons)
 

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { DesktopWindow } from '../composables/desktop'
+import { computed } from 'vue'
+import { useDesktop } from '../composables/desktop'
 
 const props = defineProps<{
   window: DesktopWindow
@@ -15,6 +17,8 @@ const emit = defineEmits<{
 }>()
 
 const win = props.window
+const desktop = useDesktop()
+const isWindowsStyle = computed(() => desktop.windowStyle.value === 'windows')
 
 // ---------------- dragging ----------------
 function onDragStart(e: PointerEvent) {
@@ -105,7 +109,7 @@ function clampY(y: number) {
 <template>
   <div
     class="mac-window"
-    :class="{ 'is-maximized': win.maximized, 'is-minimized': win.minimized }"
+    :class="{ 'is-maximized': win.maximized, 'is-minimized': win.minimized, 'is-windows': isWindowsStyle }"
     :style="{
       zIndex: win.z,
       width: `${win.width}px`,
@@ -121,7 +125,7 @@ function clampY(y: number) {
       @pointerdown="onDragStart"
       @dblclick="emit('toggle-maximize', win.id)"
     >
-      <div class="mac-window__lights">
+      <div v-if="!isWindowsStyle" class="mac-window__lights">
         <button
           class="mac-light mac-light--close"
           title="关闭"
@@ -145,6 +149,32 @@ function clampY(y: number) {
           @click="emit('toggle-maximize', win.id)"
         >
           <i i-ri-checkbox-blank-line />
+        </button>
+      </div>
+      <div v-else class="mac-window__win-controls">
+        <button
+          class="mac-win-btn mac-win-btn--minimize"
+          title="最小化"
+          data-window-control
+          @click="emit('minimize', win.id)"
+        >
+          <i i-ri-subtract-line />
+        </button>
+        <button
+          class="mac-win-btn mac-win-btn--maximize"
+          title="最大化"
+          data-window-control
+          @click="emit('toggle-maximize', win.id)"
+        >
+          <i i-ri-checkbox-blank-line />
+        </button>
+        <button
+          class="mac-win-btn mac-win-btn--close"
+          title="关闭"
+          data-window-control
+          @click="emit('close', win.id)"
+        >
+          <i i-ri-close-line />
         </button>
       </div>
 
@@ -182,9 +212,7 @@ function clampY(y: number) {
   flex-direction: column;
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(250, 250, 252, 0.82);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.12),
@@ -194,7 +222,18 @@ function clampY(y: number) {
     box-shadow 0.25s ease,
     opacity 0.25s ease,
     border-radius 0.2s ease;
-  will-change: transform, width, height;
+}
+
+.mac-window::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(250, 250, 252, 0.82);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .mac-window:not(.is-minimized):not(.is-maximized) {
@@ -226,11 +265,15 @@ function clampY(y: number) {
 }
 
 html.dark .mac-window {
-  background: rgba(30, 30, 34, 0.82);
+  background: transparent;
   border-color: rgba(255, 255, 255, 0.09);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.5),
     0 22px 70px 4px rgba(0, 0, 0, 0.6);
+}
+
+html.dark .mac-window::before {
+  background: rgba(30, 30, 34, 0.82);
 }
 
 .mac-window__titlebar {
@@ -303,6 +346,46 @@ html.dark .mac-window__titlebar {
 .mac-light--maximize {
   background: #28c840;
   color: rgba(0, 70, 0, 0.7);
+}
+
+.mac-window__win-controls {
+  display: flex;
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+}
+
+.mac-win-btn {
+  width: 46px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--va-c-text, #333);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mac-win-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.mac-win-btn--close:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+html.dark .mac-win-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .mac-win-btn--close:hover {
+  background: #e81123;
+  color: #fff;
 }
 
 .mac-window__title {
@@ -395,6 +478,10 @@ html.dark .mac-window__titlebar {
 /* 移动端：隐藏交通灯、精简标题栏 */
 @media (max-width: 768px) {
   .mac-window__lights {
+    display: none;
+  }
+
+  .mac-window__win-controls {
     display: none;
   }
 

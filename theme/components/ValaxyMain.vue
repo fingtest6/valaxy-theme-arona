@@ -29,6 +29,10 @@ const dateText = computed(() => {
 })
 
 const author = computed(() => props.frontmatter?.author || '')
+
+const tags = computed(() =>
+  Array.isArray(props.frontmatter?.tags) ? props.frontmatter.tags : [],
+)
 </script>
 
 <template>
@@ -40,6 +44,9 @@ const author = computed(() => props.frontmatter?.author || '')
       <div v-if="dateText || author" class="article-view__meta">
         <span v-if="author" class="article-view__author">{{ author }}</span>
         <time v-if="dateText" class="article-view__date">{{ dateText }}</time>
+      </div>
+      <div v-if="tags.length" class="article-view__tags">
+        <span v-for="tag in tags" :key="tag" class="article-view__tag">#{{ tag }}</span>
       </div>
     </header>
 
@@ -92,5 +99,30 @@ html.dark .article-view__meta {
 
 .article-view__author {
   font-weight: 600;
+}
+
+.article-view__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.article-view__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--va-c-primary, #0078e7);
+  background: rgba(0, 120, 231, 0.12);
+  background: color-mix(in srgb, var(--va-c-primary, #0078e7) 12%, transparent);
+}
+
+html.dark .article-view__tag {
+  color: var(--va-c-primary, #4ea1ff);
+  background: rgba(78, 161, 255, 0.18);
+  background: color-mix(in srgb, var(--va-c-primary, #4ea1ff) 18%, transparent);
 }
 </style>

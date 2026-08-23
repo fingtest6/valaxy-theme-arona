@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAppStore, useLocale, useSiteConfig } from 'valaxy'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDesktop } from '../../composables/desktop'
 import { useIsMobile } from '../../composables/useIsMobile'
@@ -23,6 +24,9 @@ const ACCENTS = [
 
 const showLocale = siteConfig.value.languages.length > 1
 
+const footerClickCount = ref(0)
+const BROWSER_UNLOCK_CLICKS = 5
+
 function setAccent(color: string) {
   desktop.setAccent(color)
 }
@@ -31,6 +35,18 @@ function setMode(mode: 'fullscreen' | 'window') {
   desktop.setDisplayMode(mode)
   if (typeof localStorage !== 'undefined')
     localStorage.setItem('arona-article-mode', mode)
+}
+
+function setWindowStyle(style: 'mac' | 'windows') {
+  desktop.setWindowStyle(style)
+  if (typeof localStorage !== 'undefined')
+    localStorage.setItem('arona-window-style', style)
+}
+
+function onFooterClick() {
+  footerClickCount.value += 1
+  if (footerClickCount.value >= BROWSER_UNLOCK_CLICKS && !desktop.browserUnlocked.value)
+    desktop.setBrowserUnlocked(true)
 }
 
 function toggleDark(e: MouseEvent) {
@@ -77,6 +93,37 @@ function toggleDark(e: MouseEvent) {
           :class="{ 'is-active': desktop.accent.value === c.value }"
           @click="setAccent(c.value)"
         />
+      </div>
+    </div>
+
+    <div class="settings-app__group">
+      <h3 class="settings-app__heading">
+        窗口
+      </h3>
+
+      <div class="setting-row">
+        <div class="setting-row__label">
+          <span class="setting-row__title">窗口样式</span>
+          <span class="setting-row__hint">标题栏按钮风格</span>
+        </div>
+      </div>
+      <div class="mode-row">
+        <button
+          class="mode-btn"
+          :class="{ 'is-active': desktop.windowStyle.value === 'mac' }"
+          @click="setWindowStyle('mac')"
+        >
+          <i i-ri-apple-line />
+          macOS
+        </button>
+        <button
+          class="mode-btn"
+          :class="{ 'is-active': desktop.windowStyle.value === 'windows' }"
+          @click="setWindowStyle('windows')"
+        >
+          <i i-ri-windows-line />
+          Windows
+        </button>
       </div>
     </div>
 
@@ -128,7 +175,9 @@ function toggleDark(e: MouseEvent) {
     </div>
 
     <div class="settings-app__footer">
-      <p>valaxy-theme-arona</p>
+      <p class="settings-app__easter" @click="onFooterClick">
+        {{ desktop.browserUnlocked.value ? '🎉 彩蛋已解锁' : 'valaxy-theme-arona' }}
+      </p>
     </div>
   </div>
 </template>
@@ -330,6 +379,16 @@ html.dark .settings-app__btn {
   text-align: center;
   font-size: 12px;
   color: rgba(0, 0, 0, 0.4);
+}
+
+.settings-app__easter {
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s ease;
+}
+
+.settings-app__easter:hover {
+  opacity: 0.7;
 }
 
 html.dark .settings-app__footer {

@@ -10,6 +10,7 @@ import AboutApp from './apps/AboutApp.vue'
 import ArchiveApp from './apps/ArchiveApp.vue'
 import ArticleApp from './apps/ArticleApp.vue'
 import ArticlesApp from './apps/ArticlesApp.vue'
+import BrowserApp from './apps/BrowserApp.vue'
 import FriendsApp from './apps/FriendsApp.vue'
 import ReaderApp from './apps/ReaderApp.vue'
 import SearchApp from './apps/SearchApp.vue'
@@ -43,6 +44,7 @@ const appComponents: Record<string, any> = {
   friends: FriendsApp,
   about: AboutApp,
   settings: SettingsApp,
+  browser: BrowserApp,
 }
 
 function componentFor(win: DesktopWindow) {
@@ -138,6 +140,10 @@ onMounted(() => {
   const savedMode = typeof localStorage !== 'undefined' ? localStorage.getItem('arona-article-mode') : null
   if (savedMode === 'fullscreen' || savedMode === 'window')
     desktop.setDisplayMode(savedMode)
+
+  const savedWindowStyle = typeof localStorage !== 'undefined' ? localStorage.getItem('arona-window-style') : null
+  if (savedWindowStyle === 'mac' || savedWindowStyle === 'windows')
+    desktop.setWindowStyle(savedWindowStyle)
 
   // 确保首页窗口已打开（若模式未变化，上面的 watcher 不会触发）
   syncWindows(true)

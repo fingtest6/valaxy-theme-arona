@@ -46,6 +46,9 @@ onUpdated(() => {
 })
 
 const fallbackTitle = computed(() => resolveTitle(props.post?.title))
+const pendingTags = computed(() =>
+  Array.isArray(props.post?.tags) ? props.post.tags : [],
+)
 </script>
 
 <template>
@@ -63,6 +66,9 @@ const fallbackTitle = computed(() => resolveTitle(props.post?.title))
       <div v-if="snapshotHtml" class="article-snapshot" v-html="snapshotHtml" />
       <div v-else class="article-app__pending">
         <span class="article-app__pending-title">{{ fallbackTitle }}</span>
+        <div v-if="pendingTags.length" class="article-app__pending-tags">
+          <span v-for="tag in pendingTags" :key="tag" class="article-app__pending-tag">#{{ tag }}</span>
+        </div>
         <span class="article-app__pending-hint">点击窗口即可切换阅读</span>
       </div>
     </div>
@@ -115,6 +121,29 @@ html.dark .article-app__pending {
 .article-app__pending-title {
   font-size: 16px;
   font-weight: 700;
+}
+
+.article-app__pending-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.article-app__pending-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--va-c-primary, #0078e7);
+  background: rgba(0, 120, 231, 0.12);
+  background: color-mix(in srgb, var(--va-c-primary, #0078e7) 12%, transparent);
+}
+
+html.dark .article-app__pending-tag {
+  color: var(--va-c-primary, #4ea1ff);
+  background: rgba(78, 161, 255, 0.18);
+  background: color-mix(in srgb, var(--va-c-primary, #4ea1ff) 18%, transparent);
 }
 
 .article-app__pending-hint {

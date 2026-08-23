@@ -1,9 +1,11 @@
 import type { Post } from 'valaxy'
 import { computed, reactive } from 'vue'
 
-export type AppId = 'articles' | 'archive' | 'search' | 'friends' | 'about' | 'settings'
+export type AppId = 'articles' | 'archive' | 'search' | 'friends' | 'about' | 'settings' | 'browser'
 
 export type ArticleDisplayMode = 'fullscreen' | 'window'
+
+export type WindowStyle = 'mac' | 'windows'
 
 export interface DesktopWindow {
   id: string
@@ -44,6 +46,7 @@ export const APPS: AppMeta[] = [
   { id: 'search', title: '搜索', icon: 'i-ri-search-line', defaultWidth: 600, defaultHeight: 620 },
   { id: 'friends', title: '友链', icon: 'i-ri-links-line', defaultWidth: 560, defaultHeight: 560 },
   { id: 'about', title: '关于', icon: 'i-ri-information-line', defaultWidth: 520, defaultHeight: 520 },
+  { id: 'browser', title: '浏览器', icon: 'i-ri-globe-line', defaultWidth: 960, defaultHeight: 640 },
 ]
 
 const SETTINGS_META: AppMeta = {
@@ -73,6 +76,8 @@ const state = reactive({
   activeId: '',
   accent: '#0078E7',
   displayMode: 'fullscreen' as ArticleDisplayMode,
+  windowStyle: 'mac' as WindowStyle,
+  browserUnlocked: false,
 })
 
 function centerCoords(width: number, height: number) {
@@ -300,6 +305,14 @@ export function useDesktop() {
     state.displayMode = mode
   }
 
+  function setWindowStyle(style: WindowStyle) {
+    state.windowStyle = style
+  }
+
+  function setBrowserUnlocked(unlocked: boolean) {
+    state.browserUnlocked = unlocked
+  }
+
   /**
    * 仅在首次时初始化显示模式（组件因布局切换重挂载时保留运行时模式）
    */
@@ -330,6 +343,8 @@ export function useDesktop() {
     readerWindow,
     accent: computed(() => state.accent),
     displayMode: computed(() => state.displayMode),
+    windowStyle: computed(() => state.windowStyle),
+    browserUnlocked: computed(() => state.browserUnlocked),
     openApp,
     openReader,
     openArticle,
@@ -341,6 +356,8 @@ export function useDesktop() {
     updateSize,
     setAccent,
     setDisplayMode,
+    setBrowserUnlocked,
+    setWindowStyle,
     initDisplayMode,
     reset,
   }

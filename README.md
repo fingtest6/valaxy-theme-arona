@@ -25,6 +25,9 @@ Valaxy-Theme-Arona<sup><em>(vue)</em></sup>
 - [x] 友情链接页面
 - [x] 搜索功能
 - [x] 图标
+- [x] Tag以及其他文章标签修复
+- [x] 切换win的窗口样式
+- [x] 浏览器彩蛋
 - [ ] 编写安装方法
 - [ ] 添加阿罗娜 spine
 
