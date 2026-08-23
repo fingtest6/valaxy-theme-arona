@@ -74,6 +74,14 @@ export function themePlugin(options: ResolvedValaxyOptions<ThemeConfig>): Plugin
         },
 
         valaxy: {},
+
+        optimizeDeps: {
+          include: [
+            'recaptcha-v3',
+            '@waline/client',
+            '@waline/client/component',
+          ],
+        },
       }
     },
   }
