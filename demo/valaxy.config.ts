@@ -9,26 +9,18 @@ export default defineConfig<ThemeConfig>({
   theme: 'arona',
 
   themeConfig: {
+    // 强调色配置
     // colors: {
     //   primary: 'red',
     // },
 
-    nav: [
-      {
-        text: 'GitHub',
-        link: 'https://github.com/fingtest6/valaxy-theme-arona',
-      },
-      {
-        text: 'RSS',
-        link: 'https://arona.demo.cjhcjh6.top/atom.xml',
-      },
-      {
-        text: 'Valaxy →',
-        link: 'https://github.com/YunYouJun/valaxy',
-      },
-    ],
-
-    // 友链应用数据
+    // 文章默认显示模式：'fullscreen' | 'window'
+    articleDisplayMode: 'fullscreen',
+    // 窗口标题栏默认样式：'mac' | 'windows'
+    windowStyle: 'mac',
+    // 是否启用浏览器彩蛋
+    browserEasterEgg: true,
+    // 友情链接设置
     friends: [
       {
         name: 'Valaxy',

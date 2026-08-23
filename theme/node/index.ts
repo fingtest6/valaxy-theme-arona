@@ -22,6 +22,8 @@ export const defaultThemeConfig: ThemeConfig = {
   },
 
   articleDisplayMode: 'fullscreen',
+  windowStyle: 'mac',
+  browserEasterEgg: true,
 
   footer: {
     since: 2024,

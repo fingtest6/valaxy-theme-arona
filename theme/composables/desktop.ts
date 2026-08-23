@@ -64,6 +64,7 @@ const APP_META_MAP = new Map<AppId, AppMeta>([
 
 let uid = 0
 let modeInitialized = false
+let styleInitialized = false
 
 function createId(prefix = 'win') {
   uid += 1
@@ -324,6 +325,16 @@ export function useDesktop() {
   }
 
   /**
+   * 仅在首次时初始化窗口样式（组件因布局切换重挂载时保留运行时选择）
+   */
+  function initWindowStyle(style: WindowStyle) {
+    if (!styleInitialized) {
+      state.windowStyle = style
+      styleInitialized = true
+    }
+  }
+
+  /**
    * 重置窗口状态（用于 SSG 多页面渲染之间避免状态泄漏）
    */
   function reset() {
@@ -331,6 +342,7 @@ export function useDesktop() {
     state.activeId = ''
     state.zCounter = 10
     uid = 0
+    styleInitialized = false
     modeInitialized = false
   }
 
@@ -359,6 +371,7 @@ export function useDesktop() {
     setBrowserUnlocked,
     setWindowStyle,
     initDisplayMode,
+    initWindowStyle,
     reset,
   }
 }

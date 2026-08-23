@@ -78,6 +78,20 @@ export interface ThemeConfig extends DefaultTheme.Config {
   articleDisplayMode?: 'fullscreen' | 'window'
 
   /**
+   * 窗口标题栏样式
+   * - mac：macOS 风格（左侧红黄绿按钮）
+   * - windows：Windows 风格（右侧最小化/最大化/关闭按钮）
+   * @default 'mac'
+   */
+  windowStyle?: 'mac' | 'windows'
+
+  /**
+   * 是否启用浏览器彩蛋
+   * @default true
+   */
+  browserEasterEgg?: boolean
+
+  /**
    * 主题包信息（由 Valaxy 注入）
    */
   pkg?: {

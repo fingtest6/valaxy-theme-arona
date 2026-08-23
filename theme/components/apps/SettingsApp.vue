@@ -2,11 +2,13 @@
 import { useAppStore, useLocale, useSiteConfig } from 'valaxy'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useThemeConfig } from '../../composables'
 import { useDesktop } from '../../composables/desktop'
 import { useIsMobile } from '../../composables/useIsMobile'
 
 const appStore = useAppStore()
 const desktop = useDesktop()
+const themeConfig = useThemeConfig()
 const siteConfig = useSiteConfig()
 const { toggleLocales } = useLocale()
 const { locale } = useI18n()
@@ -44,6 +46,8 @@ function setWindowStyle(style: 'mac' | 'windows') {
 }
 
 function onFooterClick() {
+  if (themeConfig.value.browserEasterEgg === false)
+    return
   footerClickCount.value += 1
   if (footerClickCount.value >= BROWSER_UNLOCK_CLICKS && !desktop.browserUnlocked.value)
     desktop.setBrowserUnlocked(true)

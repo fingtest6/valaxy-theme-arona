@@ -56,6 +56,10 @@ function componentFor(win: DesktopWindow) {
 const configuredMode = themeConfig.value.articleDisplayMode || 'fullscreen'
 desktop.initDisplayMode(configuredMode)
 
+// 窗口样式默认值（首次打开时生效）
+const configuredWindowStyle = themeConfig.value.windowStyle || 'mac'
+desktop.initWindowStyle(configuredWindowStyle)
+
 // ---------- 强调色 ----------
 function applyAccent(color: string) {
   if (typeof document !== 'undefined') {

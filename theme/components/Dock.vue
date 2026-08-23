@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useThemeConfig } from '../composables'
 import { APPS, useDesktop } from '../composables/desktop'
 import { useIsMobile } from '../composables/useIsMobile'
 
 const desktop = useDesktop()
 const isMobile = useIsMobile()
+const themeConfig = useThemeConfig()
 
 const APP_COLORS: Record<string, string> = {
   articles: 'linear-gradient(135deg, #2f80ed, #56ccf2)',
@@ -20,11 +22,13 @@ const autoHide = computed(() =>
   desktop.windows.value.some(w => !w.minimized && w.maximized),
 )
 
-const dockApps = computed(() =>
-  desktop.browserUnlocked.value
+const dockApps = computed(() => {
+  if (themeConfig.value.browserEasterEgg === false)
+    return APPS.filter(a => a.id !== 'browser')
+  return desktop.browserUnlocked.value
     ? APPS
-    : APPS.filter(a => a.id !== 'browser'),
-)
+    : APPS.filter(a => a.id !== 'browser')
+})
 
 function onClick(appId: string) {
   // 文章应用：全屏模式（或移动端）打开阅读器，窗口模式打开列表
