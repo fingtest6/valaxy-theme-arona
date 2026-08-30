@@ -23,7 +23,7 @@ interface YearGroup {
 }
 
 const groups = computed<YearGroup[]>(() => {
-  const map = new Map<string, Map<string, Post[]>>()
+  const map = new Map<string, Map<string, { label: string, posts: Post[] }>>()
   for (const post of posts.value) {
     if (!post.date)
       continue
@@ -35,20 +35,18 @@ const groups = computed<YearGroup[]>(() => {
       map.set(year, new Map())
     const months = map.get(year)!
     if (!months.has(monthKey))
-      months.set(monthKey, [])
-    // 用 key 附带 label，直接复用
-    ;(months.get(monthKey) as any).__label = monthLabel
-    months.get(monthKey)!.push(post)
+      months.set(monthKey, { label: monthLabel, posts: [] })
+    months.get(monthKey)!.posts.push(post)
   }
 
   const result: YearGroup[] = []
   for (const [year, months] of map) {
     const monthGroups: MonthGroup[] = []
     let yearCount = 0
-    for (const [key, list] of months) {
+    for (const [key, { label, posts: list }] of months) {
       monthGroups.push({
         key,
-        label: (list as any).__label || key.slice(5),
+        label,
         count: list.length,
         posts: list,
       })
@@ -110,7 +108,12 @@ function openPost(post: Post) {
     </div>
 
     <div class="archive-app__list">
-      <div v-for="group in groups" :key="group.year" class="year">
+      <div
+        v-for="(group, gi) in groups"
+        :key="group.year"
+        class="year"
+        :style="{ '--stagger-i': Math.min(gi, 8) }"
+      >
         <button class="year__head" @click="toggle(group.year)">
           <i i-ri-arrow-right-s-line class="year__caret" :class="{ 'is-open': expanded.has(group.year) }" />
           <span class="year__label">{{ group.year }} 年</span>
@@ -166,6 +169,24 @@ html.dark .archive-app {
   padding: 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   flex-shrink: 0;
+}
+
+/* 统计卡与年份组错落入场 */
+.archive-app__stats .stat {
+  animation: st-fade-up var(--st-dur-slow) var(--st-ease-out) backwards;
+}
+
+.archive-app__stats .stat:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.archive-app__stats .stat:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.year {
+  animation: st-fade-up var(--st-dur-slow) var(--st-ease-out) backwards;
+  animation-delay: calc(var(--stagger-i, 0) * 50ms);
 }
 
 html.dark .archive-app__stats {
@@ -290,10 +311,14 @@ html.dark .month__count {
   cursor: pointer;
   text-align: left;
   color: var(--va-c-text, #333);
+  transition:
+    background 0.15s ease,
+    translate 0.2s var(--st-ease-out);
 }
 
 .month__post:hover {
   background: rgba(0, 0, 0, 0.05);
+  translate: 0 -1px;
 }
 
 html.dark .month__post:hover {

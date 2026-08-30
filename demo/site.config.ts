@@ -32,16 +32,4 @@ export default defineSiteConfig({
       keys: ['title', 'tags', 'categories', 'excerpt', 'content'],
     },
   },
-  themeConfig: {
-    colors: {
-      primary: '#0070f3',
-    },
-    nav: [],
-    footer: {
-      // 页脚配置
-      since: 2024,
-      powered: true,
-    },
-    walineServerURL: 'https://waline.rduteam.top',
-  },
 })

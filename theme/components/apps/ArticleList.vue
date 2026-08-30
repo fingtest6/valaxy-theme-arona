@@ -39,9 +39,10 @@ function formatDate(d: Post['date']) {
 
     <div class="article-list__scroll">
       <button
-        v-for="post in filteredPosts"
+        v-for="(post, i) in filteredPosts"
         :key="post.path"
         class="article-list__item"
+        :style="{ '--stagger-i': Math.min(i, 10) }"
         @click="emit('open', post)"
       >
         <span class="article-list__title">{{ resolveTitle(post.title) }}</span>
@@ -117,11 +118,22 @@ html.dark .article-list__search {
   border-radius: 10px;
   background: transparent;
   cursor: pointer;
-  transition: background 0.15s ease;
+  /* 错落入场：按序号递增延迟 */
+  animation: st-fade-up var(--st-dur-slow) var(--st-ease-out) backwards;
+  animation-delay: calc(var(--stagger-i, 0) * 40ms);
+  transition:
+    background 0.15s ease,
+    translate 0.2s var(--st-ease-out),
+    scale 0.2s var(--st-ease-out);
 }
 
 .article-list__item:hover {
   background: rgba(0, 0, 0, 0.05);
+  translate: 0 -1px;
+}
+
+.article-list__item:active {
+  scale: 0.99;
 }
 
 html.dark .article-list__item:hover {

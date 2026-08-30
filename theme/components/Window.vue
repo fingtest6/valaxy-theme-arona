@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import type { DesktopWindow } from '../composables/desktop'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useDesktop } from '../composables/desktop'
 
 const props = defineProps<{
   window: DesktopWindow
+  /**
+   * 是否为当前激活窗口（用于焦点样式）
+   */
+  active?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'focus', id: string): void
   (e: 'close', id: string): void
   (e: 'minimize', id: string): void
-  (e: 'toggle-maximize', id: string): void
+  (e: 'toggleMaximize', id: string): void
   (e: 'move', id: string, x: number, y: number): void
   (e: 'resize', id: string, width: number, height: number): void
 }>()
@@ -19,6 +23,9 @@ const emit = defineEmits<{
 const win = props.window
 const desktop = useDesktop()
 const isWindowsStyle = computed(() => desktop.windowStyle.value === 'windows')
+
+// 拖拽/缩放期间禁用尺寸与位移过渡，保证窗口完全跟手
+const interacting = ref(false)
 
 // ---------------- dragging ----------------
 function onDragStart(e: PointerEvent) {
@@ -34,6 +41,7 @@ function onDragStart(e: PointerEvent) {
   const startY = e.clientY
   const originX = win.x
   const originY = win.y
+  interacting.value = true
 
   const onMove = (ev: PointerEvent) => {
     const dx = ev.clientX - startX
@@ -41,6 +49,7 @@ function onDragStart(e: PointerEvent) {
     emit('move', win.id, clampX(originX + dx), clampY(originY + dy))
   }
   const onUp = () => {
+    interacting.value = false
     window.removeEventListener('pointermove', onMove)
     window.removeEventListener('pointerup', onUp)
   }
@@ -58,6 +67,7 @@ function onResizeStart(e: PointerEvent) {
   e.preventDefault()
   e.stopPropagation()
   emit('focus', win.id)
+  interacting.value = true
 
   const startX = e.clientX
   const startY = e.clientY
@@ -85,6 +95,7 @@ function onResizeStart(e: PointerEvent) {
       emit('move', win.id, x, y)
   }
   const onUp = () => {
+    interacting.value = false
     window.removeEventListener('pointermove', onMove)
     window.removeEventListener('pointerup', onUp)
   }
@@ -109,12 +120,19 @@ function clampY(y: number) {
 <template>
   <div
     class="mac-window"
-    :class="{ 'is-maximized': win.maximized, 'is-minimized': win.minimized, 'is-windows': isWindowsStyle }"
+    :class="{
+      'is-maximized': win.maximized,
+      'is-minimized': win.minimized,
+      'is-closing': win.closing,
+      'is-active': active && !win.closing,
+      'is-interacting': interacting,
+      'is-windows': isWindowsStyle,
+    }"
     :style="{
-      zIndex: win.z,
-      width: `${win.width}px`,
-      height: `${win.height}px`,
-      transform: `translate(${win.x}px, ${win.y}px)`,
+      'zIndex': win.z,
+      'width': `${win.width}px`,
+      'height': `${win.height}px`,
+      'transform': `translate(${win.x}px, ${win.y}px)`,
       '--accent': 'var(--st-accent)',
     }"
     @pointerdown="emit('focus', win.id)"
@@ -123,7 +141,7 @@ function clampY(y: number) {
     <div
       class="mac-window__titlebar"
       @pointerdown="onDragStart"
-      @dblclick="emit('toggle-maximize', win.id)"
+      @dblclick="emit('toggleMaximize', win.id)"
     >
       <div v-if="!isWindowsStyle" class="mac-window__lights">
         <button
@@ -146,7 +164,7 @@ function clampY(y: number) {
           class="mac-light mac-light--maximize"
           title="缩放"
           data-window-control
-          @click="emit('toggle-maximize', win.id)"
+          @click="emit('toggleMaximize', win.id)"
         >
           <i i-ri-checkbox-blank-line />
         </button>
@@ -164,7 +182,7 @@ function clampY(y: number) {
           class="mac-win-btn mac-win-btn--maximize"
           title="最大化"
           data-window-control
-          @click="emit('toggle-maximize', win.id)"
+          @click="emit('toggleMaximize', win.id)"
         >
           <i i-ri-checkbox-blank-line />
         </button>
@@ -216,12 +234,28 @@ function clampY(y: number) {
   border: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.12),
-    0 22px 70px 4px rgba(0, 0, 0, 0.32),
-    0 8px 24px rgba(0, 0, 0, 0.18);
+    0 16px 48px 2px rgba(0, 0, 0, 0.26),
+    0 6px 18px rgba(0, 0, 0, 0.14);
+  /* 打开时播放入场动画（仅元素挂载时执行一次） */
+  animation: st-window-in 0.34s var(--st-ease-out) backwards;
   transition:
-    box-shadow 0.25s ease,
-    opacity 0.25s ease,
-    border-radius 0.2s ease;
+    box-shadow var(--st-dur-base) var(--st-ease-in-out),
+    opacity var(--st-dur-base) var(--st-ease-in-out),
+    border-radius var(--st-dur-base) var(--st-ease-out),
+    top var(--st-dur-base) var(--st-ease-out),
+    transform var(--st-dur-base) var(--st-ease-out),
+    width var(--st-dur-base) var(--st-ease-out),
+    height var(--st-dur-base) var(--st-ease-out),
+    translate var(--st-dur-base) var(--st-ease-out),
+    scale var(--st-dur-base) var(--st-ease-out);
+}
+
+/* 拖拽/缩放进行中：关闭尺寸与位移过渡，保证窗口完全跟手 */
+.mac-window.is-interacting {
+  transition:
+    box-shadow var(--st-dur-base) var(--st-ease-in-out),
+    opacity var(--st-dur-base) var(--st-ease-in-out),
+    border-radius var(--st-dur-base) var(--st-ease-out);
 }
 
 .mac-window::before {
@@ -229,30 +263,38 @@ function clampY(y: number) {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: rgba(250, 250, 252, 0.82);
+  background: rgba(250, 250, 252, 0.72);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   z-index: -1;
   pointer-events: none;
+  transition: background var(--st-dur-base) ease;
 }
 
-.mac-window:not(.is-minimized):not(.is-maximized) {
-  animation: window-in 0.22s ease;
+/* 激活窗口：玻璃更实、阴影更深，营造悬浮层级感 */
+.mac-window.is-active {
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.12),
+    0 28px 80px 6px rgba(0, 0, 0, 0.34),
+    0 10px 28px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes window-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.mac-window.is-active::before {
+  background: rgba(250, 250, 252, 0.82);
+}
+
+.mac-window.is-closing {
+  pointer-events: none;
+  animation: st-window-out var(--st-dur-base) var(--st-ease-in) forwards;
 }
 
 .mac-window.is-minimized {
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.8) translateY(40vh);
+  scale: 0.88;
+  translate: 0 42vh;
+  border-radius: 26px;
 }
 
 .mac-window.is-maximized {
@@ -269,10 +311,21 @@ html.dark .mac-window {
   border-color: rgba(255, 255, 255, 0.09);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.5),
-    0 22px 70px 4px rgba(0, 0, 0, 0.6);
+    0 16px 48px 2px rgba(0, 0, 0, 0.55);
+}
+
+html.dark .mac-window.is-active {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.5),
+    0 28px 80px 6px rgba(0, 0, 0, 0.62);
 }
 
 html.dark .mac-window::before {
+  background: rgba(30, 30, 34, 0.72);
+}
+
+html.dark .mac-window.is-active::before {
   background: rgba(30, 30, 34, 0.82);
 }
 
@@ -285,20 +338,12 @@ html.dark .mac-window::before {
   cursor: default;
   user-select: none;
   position: relative;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.34),
-    rgba(255, 255, 255, 0.12)
-  );
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.12));
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 html.dark .mac-window__titlebar {
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
-  );
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 

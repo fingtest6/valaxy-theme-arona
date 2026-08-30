@@ -12,6 +12,7 @@ interface Friend {
   avatar?: string
   description?: string
   icon?: string
+  color?: string
 }
 
 const friends = computed<Friend[]>(() => {
@@ -25,12 +26,8 @@ const friends = computed<Friend[]>(() => {
     link: s.link,
     icon: s.icon,
     color: s.color,
-  } as any))
+  }))
 })
-
-function avatarUrl(f: any) {
-  return f.avatar || ''
-}
 </script>
 
 <template>
@@ -42,9 +39,10 @@ function avatarUrl(f: any) {
 
     <div class="friends-app__grid">
       <a
-        v-for="f in friends"
+        v-for="(f, i) in friends"
         :key="f.link"
         class="friend-card"
+        :style="{ '--stagger-i': Math.min(i, 12) }"
         :href="f.link"
         target="_blank"
         rel="noopener noreferrer"
@@ -123,12 +121,21 @@ html.dark .friends-app__header {
   background: rgba(0, 0, 0, 0.04);
   text-decoration: none;
   color: var(--va-c-text, #333);
-  transition: transform 0.15s ease, background 0.15s ease;
+  animation: st-fade-up var(--st-dur-slow) var(--st-ease-out) backwards;
+  animation-delay: calc(var(--stagger-i, 0) * 40ms);
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    scale 0.15s var(--st-ease-out);
 }
 
 .friend-card:hover {
   background: rgba(0, 0, 0, 0.07);
   transform: translateY(-2px);
+}
+
+.friend-card:active {
+  scale: 0.98;
 }
 
 html.dark .friend-card {

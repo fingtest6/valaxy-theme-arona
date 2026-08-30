@@ -27,6 +27,10 @@ export interface DesktopWindow {
    */
   postPath?: string
   post?: Post
+  /**
+   * 窗口正在播放关闭动画，稍后从列表移除；期间再次打开可取消关闭
+   */
+  closing?: boolean
 }
 
 export interface AppMeta {
@@ -66,6 +70,11 @@ let uid = 0
 let modeInitialized = false
 let styleInitialized = false
 
+/**
+ * 窗口关闭动画时长（与 Window.vue 的 st-window-out 动画保持一致）
+ */
+const WINDOW_CLOSE_MS = 260
+
 function createId(prefix = 'win') {
   uid += 1
   return `${prefix}-${uid}`
@@ -80,6 +89,8 @@ const state = reactive({
   windowStyle: 'mac' as WindowStyle,
   browserUnlocked: false,
 })
+
+const closeTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
 function centerCoords(width: number, height: number) {
   const w = typeof window !== 'undefined' ? window.innerWidth : 1280
@@ -118,43 +129,63 @@ function clampToViewport(width: number, height: number) {
 function focus(id: string) {
   if (!id)
     return
-  state.zCounter += 1
   const win = state.windows.find(w => w.id === id)
-  if (win) {
-    win.z = state.zCounter
-    win.minimized = false
-  }
+  // 正在关闭的窗口不再响应聚焦
+  if (!win || win.closing)
+    return
+  state.zCounter += 1
+  win.z = state.zCounter
+  win.minimized = false
   state.activeId = id
+}
+
+/**
+ * 取消关闭动画，让窗口重新可用（快速重开同一窗口时无缝衔接）
+ */
+function cancelClose(win: DesktopWindow) {
+  const timer = closeTimers.get(win.id)
+  if (timer) {
+    clearTimeout(timer)
+    closeTimers.delete(win.id)
+  }
+  win.closing = false
+}
+
+function removeWindow(id: string) {
+  const index = state.windows.findIndex(w => w.id === id)
+  if (index === -1)
+    return
+  state.windows.splice(index, 1)
+  if (state.activeId === id)
+    state.activeId = state.windows[state.windows.length - 1]?.id || ''
 }
 
 export function useDesktop() {
   const activeWindow = computed(() =>
-    state.windows.find(w => w.id === state.activeId && !w.minimized) || null,
+    state.windows.find(w => w.id === state.activeId && !w.minimized && !w.closing) || null,
   )
 
   const articleWindow = computed(() =>
-    state.windows.find(w => w.app === 'article') || null,
+    state.windows.find(w => w.app === 'article' && !w.closing) || null,
   )
 
   const articleWindows = computed(() =>
     state.windows.filter(w => w.app === 'article'),
   )
 
+  // 包含正在关闭的窗口，保证关闭动画期间仍渲染在桌面上
   const readerWindow = computed(() =>
     state.windows.find(w => w.app === 'reader') || null,
   )
-
-  function findAppWindow(app: AppId) {
-    return state.windows.find(w => w.app === app)
-  }
 
   /**
    * 打开（或聚焦）一个任务栏应用窗口
    */
   function openApp(app: AppId) {
     const meta = APP_META_MAP.get(app) || SETTINGS_META
-    const existing = findAppWindow(app)
+    const existing = state.windows.find(w => w.app === app)
     if (existing) {
+      cancelClose(existing)
       existing.minimized = false
       existing.maximized = isMobileViewport() || existing.maximized
       focus(existing.id)
@@ -185,8 +216,9 @@ export function useDesktop() {
    * 打开（或聚焦）全屏阅读器窗口
    */
   function openReader() {
-    const existing = findWindow('reader')
+    const existing = state.windows.find(w => w.app === 'reader')
     if (existing) {
+      cancelClose(existing)
       existing.minimized = false
       existing.maximized = true
       focus(existing.id)
@@ -219,6 +251,7 @@ export function useDesktop() {
     const path = post.path || ''
     const existing = state.windows.find(w => w.app === 'article' && w.postPath === path)
     if (existing) {
+      cancelClose(existing)
       existing.post = post
       existing.title = resolveTitle(post.title)
       focus(existing.id)
@@ -246,22 +279,32 @@ export function useDesktop() {
     return win
   }
 
-  function findWindow(id: string) {
-    return state.windows.find(w => w.id === id)
-  }
-
   function closeWindow(id: string) {
-    const index = state.windows.findIndex(w => w.id === id)
-    if (index === -1)
+    const win = state.windows.find(w => w.id === id)
+    if (!win)
       return
-    state.windows.splice(index, 1)
-    if (state.activeId === id)
-      state.activeId = state.windows[state.windows.length - 1]?.id || ''
+    // 无 DOM 环境（SSG）没有动画，直接移除
+    if (typeof window === 'undefined') {
+      removeWindow(id)
+      return
+    }
+    if (win.closing)
+      return
+    win.closing = true
+    if (state.activeId === id) {
+      const next = [...state.windows].reverse().find(w => !w.minimized && !w.closing && w.id !== id)
+      state.activeId = next?.id || ''
+    }
+    const timer = setTimeout(() => {
+      closeTimers.delete(id)
+      removeWindow(id)
+    }, WINDOW_CLOSE_MS)
+    closeTimers.set(id, timer)
   }
 
   function minimizeWindow(id: string) {
     const win = state.windows.find(w => w.id === id)
-    if (!win)
+    if (!win || win.closing)
       return
     win.minimized = !win.minimized
     if (win.minimized) {
@@ -276,7 +319,7 @@ export function useDesktop() {
 
   function toggleMaximize(id: string) {
     const win = state.windows.find(w => w.id === id)
-    if (!win)
+    if (!win || win.closing)
       return
     win.maximized = !win.maximized
     focus(id)
@@ -338,6 +381,10 @@ export function useDesktop() {
    * 重置窗口状态（用于 SSG 多页面渲染之间避免状态泄漏）
    */
   function reset() {
+    closeTimers.forEach((timer) => {
+      clearTimeout(timer)
+    })
+    closeTimers.clear()
     state.windows.splice(0)
     state.activeId = ''
     state.zCounter = 10

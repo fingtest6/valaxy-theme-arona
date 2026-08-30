@@ -26,8 +26,12 @@ const themeName = computed(() => {
         <img v-if="author.avatar" :src="author.avatar" :alt="author.name">
         <span v-else>{{ (author.name || 'A')[0] }}</span>
       </div>
-      <h2 class="about-app__name">{{ author.name }}</h2>
-      <p v-if="description" class="about-app__desc">{{ description }}</p>
+      <h2 class="about-app__name">
+        {{ author.name }}
+      </h2>
+      <p v-if="description" class="about-app__desc">
+        {{ description }}
+      </p>
     </div>
 
     <div class="about-app__social">
@@ -75,6 +79,7 @@ html.dark .about-app {
   gap: 12px;
   padding: 40px 24px 24px;
   text-align: center;
+  animation: st-fade-up var(--st-dur-slow) var(--st-ease-out) backwards;
 }
 
 .about-app__avatar {
@@ -123,6 +128,7 @@ html.dark .about-app__desc {
   justify-content: center;
   gap: 10px;
   padding: 8px 24px 24px;
+  animation: st-fade-up var(--st-dur-slow) var(--st-ease-out) 80ms backwards;
 }
 
 .social-btn {
@@ -136,11 +142,19 @@ html.dark .about-app__desc {
   font-size: 13px;
   font-weight: 600;
   color: var(--va-c-text, #333);
-  transition: background 0.15s ease;
+  transition:
+    background 0.15s ease,
+    translate 0.2s var(--st-ease-out),
+    scale 0.15s var(--st-ease-out);
 }
 
 .social-btn:hover {
   background: rgba(0, 0, 0, 0.1);
+  translate: 0 -1px;
+}
+
+.social-btn:active {
+  scale: 0.96;
 }
 
 html.dark .social-btn {
@@ -162,6 +176,7 @@ html.dark .social-btn:hover {
   font-size: 12px;
   color: rgba(0, 0, 0, 0.4);
   border-top: 1px solid rgba(0, 0, 0, 0.07);
+  animation: st-fade-in var(--st-dur-slow) ease 160ms backwards;
 }
 
 .about-app__versions {

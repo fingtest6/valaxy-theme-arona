@@ -1,8 +1,9 @@
 import { useAppStore } from 'valaxy'
 import { computed, ref } from 'vue'
 
-// 兜底信号：直接读取 window.innerWidth，随 resize / 定时刷新更新，
-// 不依赖组件生命周期（模块级），避免事件丢失导致检测失效。
+const QUERY = '(max-width: 768px)'
+
+// 事件驱动的视口检测：matchMedia change + resize 双保险，模块级共享，无轮询
 const directMobile = ref(false)
 
 function updateDirect() {
@@ -11,15 +12,15 @@ function updateDirect() {
 
 if (typeof window !== 'undefined') {
   updateDirect()
-  window.addEventListener('resize', updateDirect)
-  // 额外兜底：即使 resize/matchMedia 事件异常丢失，1 秒内也会校正
-  setInterval(updateDirect, 1000)
+  if (typeof matchMedia !== 'undefined')
+    matchMedia(QUERY).addEventListener('change', updateDirect)
+  // resize 兜底（覆盖 matchMedia 事件不可用的环境）
+  window.addEventListener('resize', updateDirect, { passive: true })
 }
 
 /**
  * 共享的移动端检测。
- * 主信号使用 Valaxy appStore.isMobile（之前可用的方式），
- * 并用模块级 directMobile（resize + 定时）作为兜底，二者取或。
+ * 主信号使用 Valaxy appStore.isMobile，并以模块级 matchMedia/resize 检测兜底，二者取或。
  */
 export function useIsMobile() {
   const appStore = useAppStore()

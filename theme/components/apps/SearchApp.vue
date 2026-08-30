@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { FuseListItem } from 'valaxy'
-import { useFuseSearch } from 'valaxy'
 import type { Ref } from 'vue'
+import { useFuseSearch } from 'valaxy'
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDesktop } from '../../composables/desktop'
 
 interface SearchResultItem {
-  item: FuseListItem & { content?: string; date?: string }
+  item: FuseListItem & { content?: string, date?: string }
   matches?: unknown[]
   score?: number
 }
@@ -66,7 +66,7 @@ function contentSnippet(item: any): string {
     return ''
   const text = String(item.content)
     .replace(/<[^>]*>/g, ' ')
-    .replace(/[#*`>\[\]!()|_~-]/g, ' ')
+    .replace(/[#*`>[\]!()|_~-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
   const idx = text.toLowerCase().indexOf(kw.toLowerCase())
@@ -106,14 +106,17 @@ function highlight(text: string): string {
 
     <div class="search-app__results">
       <button
-        v-for="r in results"
+        v-for="(r, i) in results"
         :key="r.item.link"
         class="search-result"
+        :style="{ '--stagger-i': Math.min(i, 8) }"
         @click="openLink(r.item.link)"
       >
         <h3 class="search-result__title" v-html="highlight(String(r.item.title || ''))" />
         <p v-if="keyword && contentSnippet(r.item)" class="search-result__snippet" v-html="highlight(contentSnippet(r.item))" />
-        <p v-else-if="r.item.excerpt" class="search-result__excerpt">{{ plainText(r.item.excerpt) }}</p>
+        <p v-else-if="r.item.excerpt" class="search-result__excerpt">
+          {{ plainText(r.item.excerpt) }}
+        </p>
         <div class="search-result__meta">
           <time v-if="r.item.date">{{ formatDate(r.item.date) }}</time>
           <span v-if="Array.isArray(r.item.tags) && r.item.tags.length" class="search-result__tags">
@@ -245,11 +248,17 @@ html.dark .search-app__count {
   border-radius: 10px;
   background: transparent;
   cursor: pointer;
-  transition: background 0.15s ease;
+  /* 结果按序错落浮现 */
+  animation: st-fade-up var(--st-dur-slow) var(--st-ease-out) backwards;
+  animation-delay: calc(var(--stagger-i, 0) * 35ms);
+  transition:
+    background 0.15s ease,
+    translate 0.2s var(--st-ease-out);
 }
 
 .search-result:hover {
   background: rgba(0, 0, 0, 0.05);
+  translate: 0 -1px;
 }
 
 html.dark .search-result:hover {

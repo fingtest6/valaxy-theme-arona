@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import type { DesktopWindow } from '../composables/desktop'
 import { useAppStore } from 'valaxy'
 import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import bgLight from '../assets/backgrounds/AronaRoom.webp'
+import bgDark from '../assets/backgrounds/AronaRoom_Night.webp'
 import { useThemeConfig } from '../composables'
-import type { DesktopWindow } from '../composables/desktop'
 import { resolveTitle, useDesktop } from '../composables/desktop'
 import { useIsMobile } from '../composables/useIsMobile'
 import AboutApp from './apps/AboutApp.vue'
@@ -102,9 +104,9 @@ function syncWindows(openHomeWindow: boolean) {
     const title = resolveTitle((route.meta as any)?.frontmatter?.title) || '文章'
     if (effectiveMode.value === 'fullscreen') {
       // 全屏：关闭所有文章窗口，打开/保留阅读器并更新标题
+      // openReader 内部去重，阅读器若正在播放关闭动画会被取消并保留
       desktop.articleWindows.value.slice().forEach(w => desktop.closeWindow(w.id))
-      if (!desktop.readerWindow.value)
-        desktop.openReader()
+      desktop.openReader()
       const rw = desktop.readerWindow.value
       if (rw)
         rw.title = title
@@ -122,12 +124,10 @@ function syncWindows(openHomeWindow: boolean) {
       // 全屏首页：关闭所有文章窗口，保留/打开阅读器
       desktop.articleWindows.value.slice().forEach(w => desktop.closeWindow(w.id))
       const rw = desktop.readerWindow.value
-      if (rw) {
-        rw.title = '文章'
-      }
-      else if (openHomeWindow) {
+      if (openHomeWindow || (rw && !rw.closing))
         desktop.openReader()
-      }
+      if (rw)
+        rw.title = '文章'
     }
     else if (openHomeWindow && !desktop.windows.value.some(w => w.app === 'articles')) {
       desktop.openApp('articles')
@@ -175,23 +175,31 @@ function handleArticleFocus(id: string) {
 }
 
 // ---------- 壁纸 ----------
-const wallpaperImage = computed(() => {
-  const wp = themeConfig.value.wallpaper || {}
-  if (appStore.isDark && wp.dark)
-    return wp.dark
-  return wp.light || ''
-})
-const wallpaperBlur = computed(() => !!themeConfig.value.wallpaper?.blur)
+// 亮暗两版壁纸分层叠加，明暗切换时交叉淡入淡出；
+// 未在 themeConfig 中配置壁纸时回退到主题内置壁纸
+const wallpaperConfig = computed(() => themeConfig.value.wallpaper || {})
+const useBuiltinWallpaper = computed(() => !wallpaperConfig.value.light && !wallpaperConfig.value.dark)
+const wallpaperLight = computed(() => wallpaperConfig.value.light || (useBuiltinWallpaper.value ? bgLight : ''))
+const wallpaperDark = computed(() => wallpaperConfig.value.dark || (useBuiltinWallpaper.value ? bgDark : ''))
+const wallpaperBlur = computed(() => !!wallpaperConfig.value.blur)
 </script>
 
 <template>
   <div class="desktop">
-    <!-- 壁纸 -->
-    <div
-      class="desktop__wallpaper"
-      :class="{ 'is-blur': wallpaperBlur }"
-      :style="wallpaperImage ? { backgroundImage: `url(${wallpaperImage})` } : undefined"
-    />
+    <!-- 壁纸：亮/暗两层交叉淡入淡出 -->
+    <div class="desktop__wallpaper" :class="{ 'is-blur': wallpaperBlur }">
+      <div
+        class="desktop__wallpaper-layer"
+        :class="{ 'is-on': !appStore.isDark || !wallpaperDark }"
+        :style="wallpaperLight ? { backgroundImage: `url(${wallpaperLight})` } : undefined"
+      />
+      <div
+        v-if="wallpaperDark"
+        class="desktop__wallpaper-layer"
+        :class="{ 'is-on': appStore.isDark }"
+        :style="{ backgroundImage: `url(${wallpaperDark})` }"
+      />
+    </div>
 
     <MenuBar />
 
@@ -201,6 +209,7 @@ const wallpaperBlur = computed(() => !!themeConfig.value.wallpaper?.blur)
         v-for="w in desktop.windows.value.filter(x => x.app !== 'article' && x.app !== 'reader')"
         :key="w.id"
         :window="w"
+        :active="desktop.activeId.value === w.id"
         @focus="desktop.focus"
         @close="handleClose"
         @minimize="desktop.minimizeWindow"
@@ -216,6 +225,7 @@ const wallpaperBlur = computed(() => !!themeConfig.value.wallpaper?.blur)
         v-if="desktop.readerWindow.value"
         :key="desktop.readerWindow.value.id"
         :window="desktop.readerWindow.value"
+        :active="desktop.activeId.value === desktop.readerWindow.value.id"
         @focus="desktop.focus"
         @close="handleClose"
         @minimize="desktop.minimizeWindow"
@@ -234,6 +244,7 @@ const wallpaperBlur = computed(() => !!themeConfig.value.wallpaper?.blur)
         v-for="w in desktop.articleWindows.value"
         :key="w.id"
         :window="w"
+        :active="desktop.activeId.value === w.id"
         @focus="handleArticleFocus"
         @close="handleClose"
         @minimize="desktop.minimizeWindow"
@@ -261,15 +272,27 @@ const wallpaperBlur = computed(() => !!themeConfig.value.wallpaper?.blur)
 .desktop__wallpaper {
   position: absolute;
   inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  transition: filter 0.4s ease, background-image 0.4s ease;
+  animation: st-settle 0.9s var(--st-ease-out) backwards;
+  transition: filter 0.5s var(--st-ease-in-out);
 }
 
 .desktop__wallpaper.is-blur {
   filter: blur(14px) brightness(0.9);
   transform: scale(1.06);
+}
+
+.desktop__wallpaper-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.desktop__wallpaper-layer.is-on {
+  opacity: 1;
 }
 
 .desktop__stage {

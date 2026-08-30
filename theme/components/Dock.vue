@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useThemeConfig } from '../composables'
 import { APPS, useDesktop } from '../composables/desktop'
 import { useIsMobile } from '../composables/useIsMobile'
@@ -15,6 +15,52 @@ const APP_COLORS: Record<string, string> = {
   friends: 'linear-gradient(135deg, #9b51e0, #bb6bd9)',
   about: 'linear-gradient(135deg, #27ae60, #6fcf97)',
   browser: 'linear-gradient(135deg, #00b4d8, #90e0ef)',
+}
+
+// ---------- Dock 波纹放大 ----------
+// 悬停时按与鼠标的横向距离对图标做平滑衰减放大，模拟 macOS Dock 的呼吸感
+const MAG_AMPLITUDE = 0.35
+const MAG_RADIUS = 130
+
+const iconRefs = ref<HTMLElement[]>([])
+const scales = ref<number[]>([])
+// 进入 Dock 时缓存图标横向中心（缩放不改变横向中心），mousemove 期间不再读布局
+let iconCenters: number[] = []
+
+function measureCenters() {
+  iconCenters = iconRefs.value.map((el) => {
+    if (!el)
+      return Number.POSITIVE_INFINITY
+    const rect = el.getBoundingClientRect()
+    return rect.left + rect.width / 2
+  })
+}
+
+function onDockEnter() {
+  measureCenters()
+}
+
+function onDockMove(e: MouseEvent) {
+  if (isMobile.value)
+    return
+  // 图标数量变化（如解锁彩蛋）时重新测量
+  if (iconCenters.length !== iconRefs.value.length)
+    measureCenters()
+  scales.value = iconCenters.map((center) => {
+    const distance = Math.abs(e.clientX - center)
+    const falloff = Math.max(0, 1 - distance / MAG_RADIUS)
+    return 1 + MAG_AMPLITUDE * falloff * falloff
+  })
+}
+
+function onDockLeave() {
+  scales.value = []
+  iconCenters = []
+}
+
+function iconStyle(index: number) {
+  const scale = scales.value[index]
+  return scale ? { scale: scale.toFixed(3) } : undefined
 }
 
 // 有窗口处于最大化/全屏状态时，Dock 自动向下隐藏
@@ -56,17 +102,23 @@ function onClick(appId: string) {
 
 <template>
   <div class="dock" :class="{ 'is-auto-hide': autoHide, 'is-mobile': isMobile }">
-    <div class="dock__inner">
+    <div
+      class="dock__inner"
+      @mouseenter="onDockEnter"
+      @mousemove="onDockMove"
+      @mouseleave="onDockLeave"
+    >
       <button
-        v-for="app in dockApps"
+        v-for="(app, i) in dockApps"
         :key="app.id"
+        :ref="el => (iconRefs[i] = el as HTMLElement)"
         class="dock__item"
         :title="app.title"
         @click="onClick(app.id)"
       >
         <div
           class="dock__icon"
-          :style="{ background: APP_COLORS[app.id] }"
+          :style="{ background: APP_COLORS[app.id], ...iconStyle(i) }"
         >
           <i :class="app.icon" />
         </div>
@@ -87,7 +139,9 @@ function onClick(appId: string) {
   height: var(--st-dock-h, 84px);
   display: flex;
   align-items: flex-end;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* 开机自底部滑入（translate 独立属性，与自动隐藏用的 transform 互不干扰） */
+  animation: st-slide-up var(--st-dur-boot) var(--st-ease-out) 0.12s backwards;
+  transition: transform 0.35s var(--st-ease-in-out);
 }
 
 .dock.is-auto-hide {
@@ -126,6 +180,12 @@ html.dark .dock__inner {
   background: transparent;
   padding: 0;
   cursor: pointer;
+  transition: translate 0.15s var(--st-ease-out);
+}
+
+/* 按压反馈：整个图标微微下沉 */
+.dock__item:active {
+  translate: 0 3px;
 }
 
 .dock__icon {
@@ -140,19 +200,16 @@ html.dark .dock__inner {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     0 4px 10px rgba(0, 0, 0, 0.22);
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform-origin: bottom center;
-}
-
-.dock__item:hover .dock__icon {
-  transform: scale(1.22) translateY(-6px);
+  /* scale 由鼠标位置驱动，短过渡让放大产生柔滑的拖尾感 */
+  transition: scale 0.18s ease-out;
 }
 
 .dock__tooltip {
   position: absolute;
   bottom: calc(100% + 12px);
   left: 50%;
-  transform: translateX(-50%) translateY(4px);
+  transform: translateX(-50%) translateY(4px) scale(0.9);
   padding: 4px 10px;
   border-radius: 6px;
   background: rgba(20, 20, 24, 0.9);
@@ -161,23 +218,30 @@ html.dark .dock__inner {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s var(--st-ease-spring);
 }
 
 .dock__item:hover .dock__tooltip {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(0) scale(1);
 }
 
 .dock__dot {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: transparent;
+  background: rgba(80, 80, 90, 0);
+  scale: 0;
+  transition:
+    scale 0.25s var(--st-ease-spring),
+    background-color 0.2s ease;
 }
 
 .dock__dot.is-active {
   background: rgba(80, 80, 90, 0.8);
+  scale: 1;
 }
 
 html.dark .dock__dot.is-active {

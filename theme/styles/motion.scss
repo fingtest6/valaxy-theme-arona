@@ -1,0 +1,124 @@
+/**
+ * 全局动效系统：统一缓动、时长与关键帧。
+ * 组件内可直接引用这些 CSS 变量与关键帧（如 `animation: st-fade-up 0.4s var(--st-ease-out)`）。
+ * 位移/缩放动画优先使用独立属性 translate / scale，
+ * 以便与元素自身的 transform（如窗口定位）自由组合、互不覆盖。
+ */
+
+:root {
+  /* 缓动曲线 */
+  --st-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --st-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --st-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --st-ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* 时长 */
+  --st-dur-fast: 0.18s;
+  --st-dur-base: 0.28s;
+  --st-dur-slow: 0.45s;
+  --st-dur-boot: 0.6s;
+}
+
+/* 浮现：上滑 + 淡入（列表项、面板入场） */
+@keyframes st-fade-up {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes st-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 自顶部滑入（菜单栏开机入场） */
+@keyframes st-slide-down {
+  from {
+    translate: 0 -100%;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+/* 自底部滑入（Dock 开机入场） */
+@keyframes st-slide-up {
+  from {
+    translate: 0 110%;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+/* 窗口打开：轻微放大上浮 */
+@keyframes st-window-in {
+  from {
+    opacity: 0;
+    scale: 0.92;
+    translate: 0 18px;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+/* 窗口关闭：缩小下沉淡出 */
+@keyframes st-window-out {
+  from {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0;
+    scale: 0.94;
+    translate: 0 10px;
+  }
+}
+
+/* 壁纸入场：由轻微放大回落，模拟对焦 */
+@keyframes st-settle {
+  from {
+    opacity: 0;
+    scale: 1.05;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* 悬浮呼吸（空状态图标等） */
+@keyframes st-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+/* 尊重系统「减弱动态效果」偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

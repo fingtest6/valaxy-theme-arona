@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useIsMobile } from '../../composables/useIsMobile'
 import ArticleList from './ArticleList.vue'
 
-const props = defineProps<{
+defineProps<{
   /**
    * 当前文章的编译后组件（由 Desktop 通过路由解析）
    */
@@ -35,8 +35,13 @@ function goBack() {
     </aside>
 
     <section class="reader__content">
+      <!-- 结构分支置于过渡之外，仅对文章内容做 keyed 过渡，避免分支切换与离场动画叠加产生 DOM 竞态 -->
       <div v-if="component" class="reader__content-scroll">
-        <component :is="component" />
+        <Transition name="reader-page" mode="out-in">
+          <div :key="currentPath" class="reader__content-inner">
+            <component :is="component" />
+          </div>
+        </Transition>
       </div>
       <div v-else class="reader__welcome">
         <div class="reader__welcome-icon">
@@ -74,9 +79,11 @@ function goBack() {
 
       <!-- 正文与评论在同一滚动容器内，跟随滚动 -->
       <div class="reader__mobile-scroll">
-        <div class="reader__content reader__content--mobile">
-          <component :is="component" />
-        </div>
+        <Transition name="reader-page" mode="out-in">
+          <div :key="currentPath" class="reader__content reader__content--mobile">
+            <component :is="component" />
+          </div>
+        </Transition>
 
         <aside class="reader__comments reader__comments--mobile">
           <div class="reader__comments-title">
@@ -130,6 +137,11 @@ html.dark .reader__list {
   padding: 32px 44px 56px;
 }
 
+.reader__content-inner {
+  min-height: 0;
+}
+
+/* 欢迎页入场 */
 .reader__welcome {
   flex: 1;
   display: flex;
@@ -140,6 +152,27 @@ html.dark .reader__list {
   color: rgba(0, 0, 0, 0.4);
   padding: 40px;
   text-align: center;
+  animation: st-fade-in var(--st-dur-base) var(--st-ease-out) backwards;
+}
+
+/* 文章切换过渡 */
+.reader-page-enter-active {
+  transition:
+    opacity 0.24s ease,
+    translate 0.24s var(--st-ease-out);
+}
+
+.reader-page-leave-active {
+  transition: opacity 0.14s ease;
+}
+
+.reader-page-enter-from {
+  opacity: 0;
+  translate: 0 10px;
+}
+
+.reader-page-leave-to {
+  opacity: 0;
 }
 
 html.dark .reader__welcome {
@@ -157,6 +190,8 @@ html.dark .reader__welcome {
   color: #fff;
   font-size: 34px;
   margin-bottom: 8px;
+  box-shadow: 0 12px 28px rgba(47, 128, 237, 0.35);
+  animation: st-float 4s ease-in-out infinite;
 }
 
 .reader__welcome h2 {

@@ -9,11 +9,8 @@ export default defineConfig<ThemeConfig>({
   theme: 'arona',
 
   themeConfig: {
-    // 强调色配置
-    // colors: {
-    //   primary: 'red',
-    // },
-
+    // Waline 评论服务地址
+    walineServerURL: 'https://waline.rduteam.top',
     // 文章默认显示模式：'fullscreen' | 'window'
     articleDisplayMode: 'fullscreen',
     // 窗口标题栏默认样式：'mac' | 'windows'

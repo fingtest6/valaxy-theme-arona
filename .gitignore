@@ -60,3 +60,8 @@ build/
 
 # plugins
 .VSCodeCounter
+
+# valaxy 生成产物
+atom.xml
+feed.json
+valaxy-fuse-list.json
