@@ -5,12 +5,11 @@
 
 [在线预览](https://arona.demo.cjhcjh6.top/)
 
-> [!WARNING]
-> Valaxy Theme Arona 目前仍在开发中，请谨慎用于生产环境。
+> Valaxy Theme Arona 目前仍在开发中,部分代码使用AI生成
+>
+> 如有问题前往issues反馈
 
-## ✨ 功能特性
-
-## 📦 安装
+## 安装
 
 ### 1. 安装主题
 
@@ -38,6 +37,8 @@ import { defineConfig } from 'valaxy'
 export default defineConfig({
   theme: 'arona',
   themeConfig: {
+    // Waline 评论服务地址
+    walineServerURL: 'xxx.xxx.xxx',
     // 文章默认显示模式：'fullscreen' | 'window'
     articleDisplayMode: 'fullscreen',
     // 窗口标题栏默认样式：'mac' | 'windows'
@@ -80,24 +81,7 @@ export default defineConfig({
 })
 ```
 
-> 提示：`themeConfig` 也可以写在 `site.config.ts` 中，`valaxy.config.ts` 中的配置优先级更高。
-
-## ⚙️ 配置项
-
-| 配置项               | 类型                       | 默认值         | 说明                       |
-| -------------------- | -------------------------- | -------------- | -------------------------- |
-| `articleDisplayMode` | `'fullscreen' \| 'window'` | `'fullscreen'` | 文章显示模式               |
-| `windowStyle`        | `'mac' \| 'windows'`       | `'mac'`        | 窗口标题栏样式             |
-| `browserEasterEgg`   | `boolean`                  | `true`         | 是否启用浏览器彩蛋         |
-| `friends`            | `FriendItem[]`             | `[]`           | 友情链接列表               |
-| `wallpaper.light`    | `string`                   | 内置亮色壁纸   | 亮色模式壁纸               |
-| `wallpaper.dark`     | `string`                   | 内置暗色壁纸   | 暗色模式壁纸               |
-| `wallpaper.blur`     | `boolean`                  | `false`        | 是否模糊壁纸               |
-| `footer.since`       | `number`                   | `2024`         | 页脚起始年份               |
-| `footer.powered`     | `boolean`                  | `true`         | 是否显示 Powered by Valaxy |
-| `walineServerURL`    | `string`                   | `''`           | Waline 服务端地址          |
-
-## 🚀 本地开发
+## 本地开发
 
 ```shell
 # 安装依赖
@@ -110,7 +94,7 @@ pnpm dev
 pnpm build
 ```
 
-## ✅ TODO
+## TODO
 
 - [x] 评论
 - [x] 个性化更改

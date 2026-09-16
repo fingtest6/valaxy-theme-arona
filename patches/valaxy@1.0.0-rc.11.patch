@@ -1,0 +1,28 @@
+diff --git a/client/composables/common.ts b/client/composables/common.ts
+index ee2e68f40db2fff53e1b71feb046c21c803ae5e7..574301b8bb224a5a0cb3a66304d473fac3973ea8 100644
+--- a/client/composables/common.ts
++++ b/client/composables/common.ts
+@@ -26,8 +26,8 @@ import { dataSymbol, useSiteConfig } from '../config'
+ export function useFrontmatter<FM extends Record<string, any>>() {
+   // inject not in app root
+   const route = useRoute()
+-  const frontmatter = computed(() => {
+-    return route.meta.frontmatter as Partial<(PostFrontMatter & FM)> || {}
++  const frontmatter = computed<Partial<PostFrontMatter & FM>>(() => {
++    return route.meta.frontmatter as Partial<PostFrontMatter & FM> || {}
+   })
+   return frontmatter
+ }
+diff --git a/shared/utils/i18n.ts b/shared/utils/i18n.ts
+index 05f49b8c9313af9597954115d21ceb8f0e204548..35fdfec77ff26e334ee110efc3787af570c9a3e4 100644
+--- a/shared/utils/i18n.ts
++++ b/shared/utils/i18n.ts
+@@ -17,7 +17,7 @@ export function tObject<T = string>(data: string | Record<string, T>, lang: stri
+   if (data && typeof data === 'object') {
+     return data[lang] || Object.values(data)[0] || ''
+   }
+-  return data
++  return data as string
+ }
+ 
+ /**

@@ -42,6 +42,14 @@ function goBack() {
             <component :is="component" />
           </div>
         </Transition>
+
+        <aside v-if="currentPath" class="reader__comments">
+          <div class="reader__comments-title">
+            <i i-ri-chat-3-line />
+            评论
+          </div>
+          <WalineComment :path="currentPath" />
+        </aside>
       </div>
       <div v-else class="reader__welcome">
         <div class="reader__welcome-icon">
@@ -51,16 +59,6 @@ function goBack() {
         <p>在左侧列表选择一篇文章开始阅读</p>
       </div>
     </section>
-
-    <aside v-if="currentPath" class="reader__comments">
-      <div class="reader__comments-scroll">
-        <div class="reader__comments-title">
-          <i i-ri-chat-3-line />
-          评论
-        </div>
-        <WalineComment :path="currentPath" />
-      </div>
-    </aside>
   </div>
 
   <!-- 移动端：单栏，列表 → 文章 -->
@@ -206,23 +204,13 @@ html.dark .reader__welcome {
 }
 
 .reader__comments {
-  width: 320px;
-  flex-shrink: 0;
-  border-left: 1px solid rgba(0, 0, 0, 0.08);
-  min-height: 0;
-  display: flex;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 html.dark .reader__comments {
-  border-left-color: rgba(255, 255, 255, 0.08);
-}
-
-.reader__comments-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 20px;
+  border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 .reader__comments-title {
@@ -291,9 +279,9 @@ html.dark .reader__back {
 
 .reader__comments--mobile {
   width: 100%;
-  border-left: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin-top: 0;
   padding: 16px 18px 32px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 html.dark .reader__comments--mobile {

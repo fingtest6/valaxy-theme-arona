@@ -14,7 +14,7 @@
     "typecheck": "vue-tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
-    "valaxy": "^1.0.0-rc.9"
+    "valaxy": "^1.0.0-rc.11"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.4.1",
@@ -26,5 +26,10 @@
     "unocss": "^0.62.0",
     "vitest": "^3.2.4",
     "vue-tsc": "^3.1.1"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "valaxy@1.0.0-rc.11": "patches/valaxy@1.0.0-rc.11.patch"
+    }
   }
 }

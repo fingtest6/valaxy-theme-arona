@@ -154,7 +154,7 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    '../node_modules/.pnpm/valaxy@1.0.0-rc.9_@babel+pa_a3f5cde3266ed762e421ad8df48ad745/node_modules/valaxy/client/pages/[...path].vue': {
+    '../node_modules/.pnpm/valaxy@1.0.0-rc.11_patch_ha_bf928873db5f0bfc2221140e199aac04/node_modules/valaxy/client/pages/[...path].vue': {
       routes:
         | '/[...path]'
       views:
