@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Post } from 'valaxy'
 import { computed, onMounted, onUpdated, ref } from 'vue'
+import { useCommentEnabled } from '../../composables/comment'
 import { resolveTitle } from '../../composables/desktop'
 
 const props = defineProps<{
@@ -11,6 +12,9 @@ const props = defineProps<{
    */
   active?: boolean
 }>()
+
+const commentEnabled = useCommentEnabled()
+const showComments = computed(() => commentEnabled.value && props.post?.comment !== false)
 
 // 冻结快照缓存：path -> 渲染后的 HTML（模块级，跨窗口实例共享）
 const snapshotCache = new Map<string, string>()
@@ -58,7 +62,7 @@ const pendingTags = computed(() =>
       <div ref="contentRef" class="article-app__live">
         <component :is="component" v-if="component" />
       </div>
-      <WalineComment v-if="post" :path="post.path" />
+      <WalineComment v-if="post && showComments" :path="post.path" />
     </div>
 
     <!-- 后台：冻结快照，看起来仍在显示文章 -->

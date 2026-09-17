@@ -65,13 +65,19 @@ export interface ThemeConfig extends DefaultTheme.Config {
   friends?: FriendItem[]
 
   /**
+   * 友情链接页面描述
+   * @default '这些是我常去的地方'
+   */
+  friendsDescription?: string
+
+  /**
    * 桌面壁纸配置
    */
   wallpaper?: WallpaperConfig
 
   /**
    * 文章显示模式
-   * - fullscreen：全屏三栏阅读器（列表 | 内容 | 评论）
+   * - fullscreen：全屏阅读器（列表 | 内容，评论在文章下方）
    * - window：窗口模式，可同时打开多个文章窗口
    * @default 'fullscreen'
    */

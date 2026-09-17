@@ -17,6 +17,12 @@ const themeName = computed(() => {
   const name = themeConfig.value.pkg?.name || 'valaxy-theme-arona'
   return name.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
 })
+
+const sponsor = computed(() => siteConfig.value.sponsor)
+const sponsorEnabled = computed(() => sponsor.value?.enable === true)
+const sponsorTitle = computed(() => '打赏')
+const sponsorDescription = computed(() => sponsor.value?.title || '')
+const sponsorMethods = computed(() => sponsor.value?.methods || [])
 </script>
 
 <template>
@@ -48,6 +54,37 @@ const themeName = computed(() => {
         <span>{{ s.name }}</span>
       </a>
     </div>
+
+    <section v-if="sponsorEnabled" class="about-app__sponsor">
+      <h3 class="about-app__sponsor-title">
+        <i i-ri-heart-3-line />
+        {{ sponsorTitle }}
+      </h3>
+      <p v-if="sponsorDescription" class="about-app__sponsor-desc">
+        {{ sponsorDescription }}
+      </p>
+      <div v-if="sponsorMethods.length" class="about-app__sponsor-methods">
+        <div
+          v-for="method in sponsorMethods"
+          :key="method.name"
+          class="about-app__sponsor-method"
+        >
+          <div
+            class="about-app__sponsor-method-name"
+            :style="{ color: method.color || 'var(--st-accent, #0078e7)' }"
+          >
+            <i v-if="method.icon" :class="method.icon" />
+            {{ method.name }}
+          </div>
+          <img
+            v-if="method.url"
+            :src="method.url"
+            :alt="method.name"
+            loading="lazy"
+          >
+        </div>
+      </div>
+    </section>
 
     <div class="about-app__footer">
       <div class="about-app__versions">
@@ -167,6 +204,90 @@ html.dark .social-btn:hover {
 
 .social-btn i {
   font-size: 16px;
+}
+
+.about-app__sponsor {
+  margin: 0 24px 24px;
+  padding: 20px 18px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.04);
+  animation: st-fade-up var(--st-dur-slow) var(--st-ease-out) 120ms backwards;
+}
+
+html.dark .about-app__sponsor {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.about-app__sponsor-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--va-c-text, #1d1d1f);
+}
+
+.about-app__sponsor-title i {
+  font-size: 18px;
+  color: #eb5757;
+}
+
+.about-app__sponsor-desc {
+  max-width: 360px;
+  margin: 0 auto 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+html.dark .about-app__sponsor-desc {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.about-app__sponsor-methods {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.about-app__sponsor-method {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 132px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+html.dark .about-app__sponsor-method {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.about-app__sponsor-method-name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.about-app__sponsor-method-name i {
+  font-size: 16px;
+}
+
+.about-app__sponsor-method img {
+  display: block;
+  width: 132px;
+  height: 132px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
 }
 
 .about-app__footer {

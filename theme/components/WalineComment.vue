@@ -3,7 +3,7 @@ import { Waline } from '@waline/client/component'
 import { useSiteConfig } from 'valaxy'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useThemeConfig } from '../composables'
+import { useCommentEnabled, useWalineServerURL } from '../composables'
 
 import '@waline/client/style'
 
@@ -14,15 +14,10 @@ const props = defineProps<{
   path?: string
 }>()
 
-const themeConfig = useThemeConfig()
 const siteConfig = useSiteConfig()
 const route = useRoute()
 
-const serverURL = computed(() => {
-  return themeConfig.value.walineServerURL
-    || (siteConfig.value as any)?.themeConfig?.walineServerURL
-    || ''
-})
+const serverURL = useWalineServerURL()
 
 const path = computed(() => {
   const baseUrl = siteConfig.value.url || ''
@@ -35,13 +30,11 @@ const path = computed(() => {
   return currentPath || ''
 })
 
-const enableComment = computed(() => {
-  return siteConfig.value.comment?.enable ?? false
-})
+const commentEnabled = useCommentEnabled()
 </script>
 
 <template>
-  <div v-if="enableComment && serverURL" class="waline-comment">
+  <div v-if="commentEnabled" class="waline-comment">
     <Waline :server-u-r-l="serverURL" :path="path" />
   </div>
 </template>

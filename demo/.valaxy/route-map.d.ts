@@ -72,58 +72,58 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/posts/draft': RouteRecordInfo<
-      '/posts/draft',
-      '/posts/draft',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/posts/hello-valaxy': RouteRecordInfo<
-      '/posts/hello-valaxy',
-      '/posts/hello-valaxy',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/posts/i18n': RouteRecordInfo<
-      '/posts/i18n',
-      '/posts/i18n',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/posts/markdown': RouteRecordInfo<
-      '/posts/markdown',
-      '/posts/markdown',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/posts/markdown2': RouteRecordInfo<
-      '/posts/markdown2',
-      '/posts/markdown2',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/posts/markdown3': RouteRecordInfo<
-      '/posts/markdown3',
-      '/posts/markdown3',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/posts/test': RouteRecordInfo<
-      '/posts/test',
-      '/posts/test',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     '/posts/themetest': RouteRecordInfo<
       '/posts/themetest',
       '/posts/themetest',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/themetest-2': RouteRecordInfo<
+      '/posts/themetest-2',
+      '/posts/themetest-2',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/themetest-3': RouteRecordInfo<
+      '/posts/themetest-3',
+      '/posts/themetest-3',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/themetest-4': RouteRecordInfo<
+      '/posts/themetest-4',
+      '/posts/themetest-4',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/themetest-5': RouteRecordInfo<
+      '/posts/themetest-5',
+      '/posts/themetest-5',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/themetest-6': RouteRecordInfo<
+      '/posts/themetest-6',
+      '/posts/themetest-6',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/themetest-7': RouteRecordInfo<
+      '/posts/themetest-7',
+      '/posts/themetest-7',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/posts/themetest-8': RouteRecordInfo<
+      '/posts/themetest-8',
+      '/posts/themetest-8',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -184,51 +184,51 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    'pages/posts/draft.md': {
-      routes:
-        | '/posts/draft'
-      views:
-        | never
-    }
-    'pages/posts/hello-valaxy.md': {
-      routes:
-        | '/posts/hello-valaxy'
-      views:
-        | never
-    }
-    'pages/posts/i18n.md': {
-      routes:
-        | '/posts/i18n'
-      views:
-        | never
-    }
-    'pages/posts/markdown.md': {
-      routes:
-        | '/posts/markdown'
-      views:
-        | never
-    }
-    'pages/posts/markdown2.md': {
-      routes:
-        | '/posts/markdown2'
-      views:
-        | never
-    }
-    'pages/posts/markdown3.md': {
-      routes:
-        | '/posts/markdown3'
-      views:
-        | never
-    }
-    'pages/posts/test.md': {
-      routes:
-        | '/posts/test'
-      views:
-        | never
-    }
     'pages/posts/themetest.md': {
       routes:
         | '/posts/themetest'
+      views:
+        | never
+    }
+    'pages/posts/themetest-2.md': {
+      routes:
+        | '/posts/themetest-2'
+      views:
+        | never
+    }
+    'pages/posts/themetest-3.md': {
+      routes:
+        | '/posts/themetest-3'
+      views:
+        | never
+    }
+    'pages/posts/themetest-4.md': {
+      routes:
+        | '/posts/themetest-4'
+      views:
+        | never
+    }
+    'pages/posts/themetest-5.md': {
+      routes:
+        | '/posts/themetest-5'
+      views:
+        | never
+    }
+    'pages/posts/themetest-6.md': {
+      routes:
+        | '/posts/themetest-6'
+      views:
+        | never
+    }
+    'pages/posts/themetest-7.md': {
+      routes:
+        | '/posts/themetest-7'
+      views:
+        | never
+    }
+    'pages/posts/themetest-8.md': {
+      routes:
+        | '/posts/themetest-8'
       views:
         | never
     }

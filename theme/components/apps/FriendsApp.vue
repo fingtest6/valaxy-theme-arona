@@ -15,6 +15,8 @@ interface Friend {
   color?: string
 }
 
+const friendsDescription = computed(() => themeConfig.value.friendsDescription || '这些是我常去的地方')
+
 const friends = computed<Friend[]>(() => {
   const configured = themeConfig.value.friends
   if (configured && configured.length)
@@ -34,7 +36,7 @@ const friends = computed<Friend[]>(() => {
   <div class="friends-app">
     <div class="friends-app__header">
       <h2>友情链接</h2>
-      <p>这些是我常去的地方</p>
+      <p>{{ friendsDescription }}</p>
     </div>
 
     <div class="friends-app__grid">

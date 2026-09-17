@@ -11,6 +11,8 @@ export default defineConfig<ThemeConfig>({
   themeConfig: {
     // Waline 评论服务地址
     walineServerURL: 'https://waline.rduteam.top',
+    // 友情链接描述
+    friendsDescription: '这里是友链',
     // 文章默认显示模式：'fullscreen' | 'window'
     articleDisplayMode: 'fullscreen',
     // 窗口标题栏默认样式：'mac' | 'windows'

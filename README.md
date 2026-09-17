@@ -22,23 +22,28 @@ pnpm add valaxy-theme-arona
 在 `valaxy.config.ts` 中设置 `theme: 'arona'`：
 
 ```ts
-import { defineConfig } from 'valaxy'
+import { defineValaxyConfig } from 'valaxy'
 
-export default defineConfig({
+export default defineValaxyConfig({
   theme: 'arona',
 })
 ```
 
 ### 3. 配置主题
 
-```ts
-import { defineConfig } from 'valaxy'
+在`valaxy.config.ts` 的`themeConfig: {}`粘贴下面的themeConfig配置
 
-export default defineConfig({
+```ts
+export default defineValaxyConfig({
+  // site config see site.config.ts
+
   theme: 'arona',
+
   themeConfig: {
-    // Waline 评论服务地址
+    // Waline 评论服务地址,没有启用评论不用填写
     walineServerURL: 'xxx.xxx.xxx',
+    // 友情链接描述
+    friendsDescription: '这里是友链',
     // 文章默认显示模式：'fullscreen' | 'window'
     articleDisplayMode: 'fullscreen',
     // 窗口标题栏默认样式：'mac' | 'windows'
@@ -78,6 +83,8 @@ export default defineConfig({
       since: 2025,
     },
   },
+
+  unocss: { safelist },
 })
 ```
 

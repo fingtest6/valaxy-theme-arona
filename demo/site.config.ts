@@ -32,4 +32,8 @@ export default defineSiteConfig({
       keys: ['title', 'tags', 'categories', 'excerpt', 'content'],
     },
   },
+  sponsor: {
+    enable: false,
+    title: '喵喵喵',
+  },
 })

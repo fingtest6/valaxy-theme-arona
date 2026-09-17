@@ -16,6 +16,7 @@ export const defaultThemeConfig: ThemeConfig = {
   },
 
   friends: [],
+  friendsDescription: '这些是我常去的地方',
 
   wallpaper: {
     blur: false,

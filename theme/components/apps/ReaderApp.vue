@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Post } from 'valaxy'
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useCommentEnabled } from '../../composables/comment'
 import { useIsMobile } from '../../composables/useIsMobile'
 import ArticleList from './ArticleList.vue'
 
@@ -15,8 +17,14 @@ defineProps<{
   currentPath?: string
 }>()
 
+const route = useRoute()
 const router = useRouter()
 const isMobile = useIsMobile()
+const commentEnabled = useCommentEnabled()
+const showComments = computed(() => {
+  const frontmatter = (route.meta as any)?.frontmatter
+  return commentEnabled.value && frontmatter?.comment !== false
+})
 
 function openPost(post: Post) {
   router.push(post.path || '/')
@@ -43,7 +51,7 @@ function goBack() {
           </div>
         </Transition>
 
-        <aside v-if="currentPath" class="reader__comments">
+        <aside v-if="currentPath && showComments" class="reader__comments">
           <div class="reader__comments-title">
             <i i-ri-chat-3-line />
             评论
@@ -83,7 +91,7 @@ function goBack() {
           </div>
         </Transition>
 
-        <aside class="reader__comments reader__comments--mobile">
+        <aside v-if="showComments" class="reader__comments reader__comments--mobile">
           <div class="reader__comments-title">
             <i i-ri-chat-3-line />
             评论
