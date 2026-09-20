@@ -1,3 +1,9 @@
 packages:
   - theme
   - demo
+
+# pnpm 专用设置放在这里而不是 .npmrc：
+# .npmrc 里的 pnpm 专有字段会让 npm 报 "Unknown project config"。
+shamefullyHoist: true
+strictPeerDependencies: false
+ignoreWorkspaceRootCheck: true

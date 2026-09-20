@@ -4,6 +4,7 @@ import { usePostList } from 'valaxy'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { resolveTitle, useDesktop } from '../../composables/desktop'
+import { formatMonthDay } from '../../utils/format'
 
 const desktop = useDesktop()
 const router = useRouter()
@@ -136,7 +137,7 @@ function openPost(post: Post) {
                 @click="openPost(post)"
               >
                 <span class="month__post-title">{{ resolveTitle(post.title) }}</span>
-                <time class="month__post-date">{{ new Date(post.date!).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }) }}</time>
+                <time class="month__post-date">{{ formatMonthDay(post.date) }}</time>
               </button>
             </div>
           </div>
@@ -156,11 +157,11 @@ function openPost(post: Post) {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--st-app-bg);
 }
 
 html.dark .archive-app {
-  background: rgba(24, 24, 28, 0.4);
+  background: var(--st-app-bg-dark);
 }
 
 .archive-app__stats {
@@ -211,7 +212,7 @@ html.dark .stat {
 .stat__num {
   font-size: 22px;
   font-weight: 800;
-  color: var(--st-accent, #0078e7);
+  color: var(--st-accent);
 }
 
 .stat__label {
@@ -241,7 +242,7 @@ html.dark .stat__label {
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
 }
 
 .year__head:hover,
@@ -310,7 +311,7 @@ html.dark .month__count {
   background: transparent;
   cursor: pointer;
   text-align: left;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   transition:
     background 0.15s ease,
     translate 0.2s var(--st-ease-out);

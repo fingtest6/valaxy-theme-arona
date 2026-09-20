@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { DesktopWindow } from '../composables/desktop'
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { useDesktop } from '../composables/desktop'
+import { MENUBAR_HEIGHT, WINDOW_MIN_HEIGHT, WINDOW_MIN_WIDTH } from '../shared/layout'
 
 const props = defineProps<{
   window: DesktopWindow
@@ -27,34 +28,115 @@ const isWindowsStyle = computed(() => desktop.windowStyle.value === 'windows')
 // 拖拽/缩放期间禁用尺寸与位移过渡，保证窗口完全跟手
 const interacting = ref(false)
 
+/**
+ * 进行中的指针交互清理函数
+ *
+ * 交互过程中若组件被卸载（窗口关闭动画结束被移除），必须调用它，
+ * 否则挂在 window 上的 pointermove / pointerup / pointercancel 会泄漏。
+ */
+let activeTeardown: (() => void) | undefined
+
+onBeforeUnmount(() => {
+  activeTeardown?.()
+})
+
+/**
+ * 使用 pointer capture + requestAnimationFrame 合并 pointermove
+ *
+ * 网页壁纸运行时主线程负载较高，pointermove 事件可能大量堆积，
+ * 直接在每次事件中更新窗口位置会导致窗口滞后并在恢复后瞬移。
+ */
+function startPointerInteraction(
+  e: PointerEvent,
+  applyMove: (dx: number, dy: number) => void,
+) {
+  const target = e.currentTarget as HTMLElement | null
+  const pointerId = e.pointerId
+  const startX = e.clientX
+  const startY = e.clientY
+  let latestX = startX
+  let latestY = startY
+  let frame = 0
+  let finished = false
+
+  try {
+    target?.setPointerCapture?.(pointerId)
+  }
+  catch {
+    // 某些指针状态下可能无法捕获，忽略
+  }
+
+  const apply = () => {
+    frame = 0
+    applyMove(latestX - startX, latestY - startY)
+  }
+
+  const onPointerMove = (ev: PointerEvent) => {
+    latestX = ev.clientX
+    latestY = ev.clientY
+    if (frame)
+      return
+    frame = requestAnimationFrame(apply)
+  }
+
+  let finish: () => void
+
+  /** 只做清理、不提交最终位置；组件卸载时走这条路 */
+  const cleanup = () => {
+    if (frame) {
+      cancelAnimationFrame(frame)
+      frame = 0
+    }
+
+    try {
+      target?.releasePointerCapture?.(pointerId)
+    }
+    catch {}
+
+    window.removeEventListener('pointermove', onPointerMove)
+    window.removeEventListener('pointerup', finish)
+    window.removeEventListener('pointercancel', finish)
+    target?.removeEventListener('lostpointercapture', finish)
+    interacting.value = false
+    if (activeTeardown === cleanup)
+      activeTeardown = undefined
+  }
+
+  finish = () => {
+    if (finished)
+      return
+    finished = true
+
+    cleanup()
+
+    // 提交最后一帧位置，避免松手后停在旧坐标
+    applyMove(latestX - startX, latestY - startY)
+  }
+
+  activeTeardown = cleanup
+
+  window.addEventListener('pointermove', onPointerMove, { passive: true })
+  window.addEventListener('pointerup', finish)
+  window.addEventListener('pointercancel', finish)
+  target?.addEventListener('lostpointercapture', finish, { once: true })
+}
+
 // ---------------- dragging ----------------
 function onDragStart(e: PointerEvent) {
   if (win.maximized)
     return
-  const target = e.target as HTMLElement
-  if (target.closest('[data-window-control]'))
+  const target = e.target
+  if (target instanceof Element && target.closest('[data-window-control]'))
     return
 
   emit('focus', win.id)
-
-  const startX = e.clientX
-  const startY = e.clientY
-  const originX = win.x
-  const originY = win.y
   interacting.value = true
 
-  const onMove = (ev: PointerEvent) => {
-    const dx = ev.clientX - startX
-    const dy = ev.clientY - startY
+  const originX = win.x
+  const originY = win.y
+  startPointerInteraction(e, (dx, dy) => {
     emit('move', win.id, clampX(originX + dx), clampY(originY + dy))
-  }
-  const onUp = () => {
-    interacting.value = false
-    window.removeEventListener('pointermove', onMove)
-    window.removeEventListener('pointerup', onUp)
-  }
-  window.addEventListener('pointermove', onMove)
-  window.addEventListener('pointerup', onUp)
+  })
 }
 
 // ---------------- resizing ----------------
@@ -69,50 +151,40 @@ function onResizeStart(e: PointerEvent) {
   emit('focus', win.id)
   interacting.value = true
 
-  const startX = e.clientX
-  const startY = e.clientY
-  const o = { x: win.x, y: win.y, w: win.width, h: win.height }
-
-  const onMove = (ev: PointerEvent) => {
-    const dx = ev.clientX - startX
-    const dy = ev.clientY - startY
-
-    let { x, y, w, h } = o
+  const base = { x: win.x, y: win.y, w: win.width, h: win.height }
+  startPointerInteraction(e, (dx, dy) => {
+    let { x, y, w, h } = base
     if (dir.includes('e'))
-      w = Math.max(360, o.w + dx)
+      w = Math.max(WINDOW_MIN_WIDTH, base.w + dx)
     if (dir.includes('s'))
-      h = Math.max(280, o.h + dy)
+      h = Math.max(WINDOW_MIN_HEIGHT, base.h + dy)
     if (dir.includes('w')) {
-      w = Math.max(360, o.w - dx)
-      x = clampX(o.x + (o.w - w))
+      w = Math.max(WINDOW_MIN_WIDTH, base.w - dx)
+      x = clampX(base.x + (base.w - w))
     }
     if (dir.includes('n')) {
-      h = Math.max(280, o.h - dy)
-      y = clampY(o.y + (o.h - h))
+      h = Math.max(WINDOW_MIN_HEIGHT, base.h - dy)
+      y = clampY(base.y + (base.h - h))
     }
     emit('resize', win.id, w, h)
     if (dir.includes('w') || dir.includes('n'))
       emit('move', win.id, x, y)
-  }
-  const onUp = () => {
-    interacting.value = false
-    window.removeEventListener('pointermove', onMove)
-    window.removeEventListener('pointerup', onUp)
-  }
-  window.addEventListener('pointermove', onMove)
-  window.addEventListener('pointerup', onUp)
+  })
 }
 
-const MENU_H = 30
-const MIN_Y = MENU_H + 4
+/** 距菜单栏的最小间距 */
+const MIN_Y = MENUBAR_HEIGHT + 4
+/** 拖动/缩放时至少保留在视口内的窗口边缘尺寸 */
+const EDGE_KEEP_X = 60
+const EDGE_KEEP_Y = 90
 
 function clampX(x: number) {
-  const maxX = Math.max(0, (typeof window !== 'undefined' ? window.innerWidth : 1280) - 60)
-  return Math.round(Math.min(Math.max(-(win.width - 60), x), maxX))
+  const maxX = Math.max(0, (typeof window !== 'undefined' ? window.innerWidth : 1280) - EDGE_KEEP_X)
+  return Math.round(Math.min(Math.max(-(win.width - EDGE_KEEP_X), x), maxX))
 }
 
 function clampY(y: number) {
-  const maxY = Math.max(MIN_Y, (typeof window !== 'undefined' ? window.innerHeight : 800) - 90)
+  const maxY = Math.max(MIN_Y, (typeof window !== 'undefined' ? window.innerHeight : 800) - EDGE_KEEP_Y)
   return Math.round(Math.min(Math.max(MIN_Y, y), maxY))
 }
 </script>
@@ -129,11 +201,10 @@ function clampY(y: number) {
       'is-windows': isWindowsStyle,
     }"
     :style="{
-      'zIndex': win.z,
-      'width': `${win.width}px`,
-      'height': `${win.height}px`,
-      'transform': `translate(${win.x}px, ${win.y}px)`,
-      '--accent': 'var(--st-accent)',
+      zIndex: win.z,
+      width: `${win.width}px`,
+      height: `${win.height}px`,
+      transform: `translate(${win.x}px, ${win.y}px)`,
     }"
     @pointerdown="emit('focus', win.id)"
   >
@@ -200,6 +271,16 @@ function clampY(y: number) {
         <span v-if="win.icon" :class="win.icon" class="mac-window__title-icon" />
         <span class="truncate">{{ win.title }}</span>
       </div>
+
+      <!-- 移动端专用关闭按钮：窄屏下交通灯与 Windows 控件都会被隐藏 -->
+      <button
+        class="mac-window__mobile-close"
+        title="关闭"
+        data-window-control
+        @click="emit('close', win.id)"
+      >
+        <i i-ri-close-line />
+      </button>
     </div>
 
     <!-- 内容 -->
@@ -230,8 +311,10 @@ function clampY(y: number) {
   flex-direction: column;
   border-radius: 12px;
   overflow: hidden;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(248, 249, 252, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.12),
     0 16px 48px 2px rgba(0, 0, 0, 0.26),
@@ -240,6 +323,7 @@ function clampY(y: number) {
   animation: st-window-in 0.34s var(--st-ease-out) backwards;
   transition:
     box-shadow var(--st-dur-base) var(--st-ease-in-out),
+    background var(--st-dur-base) ease,
     opacity var(--st-dur-base) var(--st-ease-in-out),
     border-radius var(--st-dur-base) var(--st-ease-out),
     top var(--st-dur-base) var(--st-ease-out),
@@ -252,36 +336,21 @@ function clampY(y: number) {
 
 /* 拖拽/缩放进行中：关闭尺寸与位移过渡，保证窗口完全跟手 */
 .mac-window.is-interacting {
+  will-change: transform;
   transition:
     box-shadow var(--st-dur-base) var(--st-ease-in-out),
     opacity var(--st-dur-base) var(--st-ease-in-out),
     border-radius var(--st-dur-base) var(--st-ease-out);
 }
 
-.mac-window::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: rgba(250, 250, 252, 0.72);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  z-index: -1;
-  pointer-events: none;
-  transition: background var(--st-dur-base) ease;
-}
-
 /* 激活窗口：玻璃更实、阴影更深，营造悬浮层级感 */
 .mac-window.is-active {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.58), rgba(250, 251, 254, 0.52));
   border-color: rgba(255, 255, 255, 0.7);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.12),
     0 28px 80px 6px rgba(0, 0, 0, 0.34),
     0 10px 28px rgba(0, 0, 0, 0.2);
-}
-
-.mac-window.is-active::before {
-  background: rgba(250, 250, 252, 0.82);
 }
 
 .mac-window.is-closing {
@@ -307,7 +376,7 @@ function clampY(y: number) {
 }
 
 html.dark .mac-window {
-  background: transparent;
+  background: linear-gradient(to bottom, rgba(58, 58, 68, 0.5), rgba(28, 28, 34, 0.5));
   border-color: rgba(255, 255, 255, 0.09);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.5),
@@ -315,18 +384,11 @@ html.dark .mac-window {
 }
 
 html.dark .mac-window.is-active {
+  background: linear-gradient(to bottom, rgba(68, 68, 80, 0.6), rgba(36, 36, 44, 0.54));
   border-color: rgba(255, 255, 255, 0.14);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.5),
     0 28px 80px 6px rgba(0, 0, 0, 0.62);
-}
-
-html.dark .mac-window::before {
-  background: rgba(30, 30, 34, 0.72);
-}
-
-html.dark .mac-window.is-active::before {
-  background: rgba(30, 30, 34, 0.82);
 }
 
 .mac-window__titlebar {
@@ -337,8 +399,9 @@ html.dark .mac-window.is-active::before {
   padding: 0 14px;
   cursor: default;
   user-select: none;
+  touch-action: none;
   position: relative;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.12));
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -409,7 +472,7 @@ html.dark .mac-window__titlebar {
   justify-content: center;
   border: none;
   background: transparent;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   font-size: 12px;
   cursor: pointer;
   transition: background 0.15s ease;
@@ -441,7 +504,7 @@ html.dark .mac-win-btn--close:hover {
   pointer-events: none;
   font-size: 13px;
   font-weight: 600;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -464,6 +527,7 @@ html.dark .mac-win-btn--close:hover {
 .rz {
   position: absolute;
   z-index: 20;
+  touch-action: none;
 }
 .rz-n,
 .rz-s {
@@ -520,6 +584,35 @@ html.dark .mac-win-btn--close:hover {
   cursor: nesw-resize;
 }
 
+/* 移动端专用关闭按钮：窄屏下没有交通灯，需要一个显式的关闭入口 */
+.mac-window__mobile-close {
+  display: none;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--va-c-text);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.mac-window__mobile-close:active {
+  scale: 0.94;
+}
+
+html.dark .mac-window__mobile-close {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f0f8ff;
+}
+
 /* 移动端：隐藏交通灯、精简标题栏 */
 @media (max-width: 768px) {
   .mac-window__lights {
@@ -528,6 +621,10 @@ html.dark .mac-win-btn--close:hover {
 
   .mac-window__win-controls {
     display: none;
+  }
+
+  .mac-window__mobile-close {
+    display: flex;
   }
 
   .mac-window__titlebar {

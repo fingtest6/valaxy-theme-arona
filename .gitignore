@@ -65,3 +65,5 @@ build/
 atom.xml
 feed.json
 valaxy-fuse-list.json
+/skills-lock.json
+/.agents/

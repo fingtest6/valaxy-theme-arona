@@ -1,6 +1,10 @@
-import type { ResolvedValaxyOptions } from 'valaxy'
 import type { Plugin } from 'vite'
 import type { ThemeConfig } from '../types'
+import { DEFAULT_WALLPAPER_WEB_IDLE_TIMEOUT } from '../shared/wallpaper'
+
+export { createAppsPlugin, writeAppRedirects } from './apps'
+
+export { createWallpaperPlugin } from './wallpaper'
 
 /**
  * Default Config
@@ -20,6 +24,13 @@ export const defaultThemeConfig: ThemeConfig = {
 
   wallpaper: {
     blur: false,
+    web: {
+      enable: false,
+      mobile: false,
+      idleTimeout: DEFAULT_WALLPAPER_WEB_IDLE_TIMEOUT,
+      cache: false,
+      interactive: true,
+    },
   },
 
   articleDisplayMode: 'fullscreen',
@@ -45,37 +56,23 @@ export const defaultThemeConfig: ThemeConfig = {
   },
 
   nav: [],
+
+  apps: {
+    files: true,
+    notes: true,
+    album: true,
+  },
 }
 
 // write a vite plugin
 // https://vitejs.dev/guide/api-plugin.html
-export function themePlugin(options: ResolvedValaxyOptions<ThemeConfig>): Plugin {
-  // 确保 themeConfig 始终有值，并合并默认配置
-  const themeConfig: ThemeConfig = {
-    ...defaultThemeConfig,
-    ...options.config.themeConfig,
-    colors: {
-      ...defaultThemeConfig.colors,
-      ...options.config.themeConfig?.colors,
-    },
-  }
-
+export function themePlugin(): Plugin {
   return {
     name: 'valaxy-theme-arona',
 
     config() {
       return {
-        css: {
-          preprocessorOptions: {
-            scss: {
-              // 确保 primary 始终有值
-              additionalData: `$c-primary: ${themeConfig.colors?.primary || '#0078E7'} !default;`,
-            },
-          },
-        },
-
-        valaxy: {},
-
+        // Waline 在评论区挂载时才加载，提前预构建避免 dev 下整页刷新
         optimizeDeps: {
           include: [
             'recaptcha-v3',
@@ -103,6 +100,16 @@ export function generateSafelist(themeConfig: ThemeConfig) {
   const appIcons = [
     'i-ri-file-list-3-line',
     'i-ri-file-text-line',
+    'i-ri-folder-2-line',
+    'i-ri-folder-open-line',
+    'i-ri-sticky-note-line',
+    'i-ri-gallery-line',
+    'i-ri-image-line',
+    'i-ri-markdown-line',
+    'i-ri-external-link-line',
+    'i-ri-add-line',
+    'i-ri-layout-grid-line',
+    'i-ri-list-check-2',
     'i-ri-archive-line',
     'i-ri-links-line',
     'i-ri-information-line',

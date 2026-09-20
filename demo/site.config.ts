@@ -4,11 +4,14 @@ export default defineSiteConfig({
   lang: 'zh-CN',
   title: 'Valaxy Theme Arona',
   url: 'https://arona.demo.cjhcjh6.top/',
+
   author: {
     avatar: 'https://i.postimg.cc/Jn29FGs6/1775401932014.png',
     name: '什亭之人',
   },
+
   description: 'Valaxy Theme Arona Preview.',
+
   social: [
     {
       name: 'RSS',
@@ -23,17 +26,22 @@ export default defineSiteConfig({
       color: '#6e5494',
     },
   ],
+
   comment: {
     enable: true,
   },
+
   // 搜索索引：包含文章全文，以便按正文关键词搜索
   fuse: {
     options: {
       keys: ['title', 'tags', 'categories', 'excerpt', 'content'],
     },
   },
+
   sponsor: {
     enable: false,
     title: '喵喵喵',
   },
+
+  mode: 'auto',
 })

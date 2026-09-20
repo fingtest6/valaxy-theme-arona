@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { DesktopWindow } from '../composables/desktop'
-import { useAppStore } from 'valaxy'
-import { computed, onMounted, watch } from 'vue'
+import type { AppId, DesktopWindow } from '../composables/desktop'
+import { computed, defineAsyncComponent, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import bgLight from '../assets/backgrounds/AronaRoom.webp'
-import bgDark from '../assets/backgrounds/AronaRoom_Night.webp'
 import { useThemeConfig } from '../composables'
-import { resolveTitle, useDesktop } from '../composables/desktop'
+import { isAppId, resolveTitle, useDesktop } from '../composables/desktop'
 import { useIsMobile } from '../composables/useIsMobile'
+import { isAppEnabled, normalizeAppRoute, resolveAppRouteMap } from '../shared/apps'
+import { readStorage, STORAGE_KEYS, writeStorage } from '../shared/storage'
+import { toRenderableComponent } from '../utils/component'
 import AboutApp from './apps/AboutApp.vue'
 import ArchiveApp from './apps/ArchiveApp.vue'
 import ArticleApp from './apps/ArticleApp.vue'
@@ -18,14 +18,19 @@ import ReaderApp from './apps/ReaderApp.vue'
 import SearchApp from './apps/SearchApp.vue'
 import SettingsApp from './apps/SettingsApp.vue'
 import Dock from './Dock.vue'
+import GlobalWallpaper from './GlobalWallpaper.vue'
 import MenuBar from './MenuBar.vue'
+import WebWallpaperPerformanceDialog from './WebWallpaperPerformanceDialog.vue'
 import Window from './Window.vue'
 
 const desktop = useDesktop()
 const route = useRoute()
 const router = useRouter()
 const themeConfig = useThemeConfig()
-const appStore = useAppStore()
+
+const FileApp = defineAsyncComponent(() => import('./apps/FileApp.vue'))
+const NotesApp = defineAsyncComponent(() => import('./apps/NotesApp.vue'))
+const AlbumApp = defineAsyncComponent(() => import('./apps/AlbumApp.vue'))
 
 // SSG 渲染时重置窗口状态，避免多页面之间状态泄漏
 if (import.meta.env.SSR)
@@ -41,6 +46,9 @@ const effectiveMode = computed(() =>
 
 const appComponents: Record<string, any> = {
   articles: ArticlesApp,
+  files: FileApp,
+  notes: NotesApp,
+  album: AlbumApp,
   archive: ArchiveApp,
   search: SearchApp,
   friends: FriendsApp,
@@ -53,6 +61,35 @@ function componentFor(win: DesktopWindow) {
   return appComponents[win.app]
 }
 
+// ---------- 应用路由 ----------
+function resolveAppFromRoute(): AppId | undefined {
+  const routeApp = resolveAppRouteMap(themeConfig.value.apps)[normalizeAppRoute(route.path)]
+  if (routeApp && isAppEnabled(routeApp, themeConfig.value.apps))
+    return routeApp as AppId
+
+  if (isAppId(route.query.app) && isAppEnabled(route.query.app, themeConfig.value.apps))
+    return route.query.app
+
+  return undefined
+}
+/**
+ * 兼容旧页面地址：命中应用路由时直接打开对应窗口，并统一为 /?app=xxx
+ */
+function applyAppRoute(): boolean {
+  const app = resolveAppFromRoute()
+  if (!app)
+    return false
+
+  desktop.openApp(app)
+
+  if (route.path !== '/' || route.query.app !== app) {
+    const query = { ...route.query, app }
+    router.replace({ path: '/', query })
+  }
+
+  return true
+}
+
 // ---------- 文章显示模式 ----------
 // 首次使用配置默认值，重挂载时保留运行时模式
 const configuredMode = themeConfig.value.articleDisplayMode || 'fullscreen'
@@ -63,21 +100,19 @@ const configuredWindowStyle = themeConfig.value.windowStyle || 'mac'
 desktop.initWindowStyle(configuredWindowStyle)
 
 // ---------- 强调色 ----------
+// --st-accent 定义为 var(--st-c-brand)，因此只需覆写后者
 function applyAccent(color: string) {
-  if (typeof document !== 'undefined') {
+  if (typeof document !== 'undefined')
     document.documentElement.style.setProperty('--st-c-brand', color)
-    document.documentElement.style.setProperty('--st-accent', color)
-  }
 }
-const savedAccent = typeof localStorage !== 'undefined' ? localStorage.getItem('arona-accent') : null
+const savedAccent = readStorage(STORAGE_KEYS.accent)
 if (savedAccent)
   desktop.setAccent(savedAccent)
 else if (themeConfig.value.colors?.primary)
   desktop.setAccent(themeConfig.value.colors.primary)
 watch(() => desktop.accent.value, (c) => {
   applyAccent(c)
-  if (typeof localStorage !== 'undefined')
-    localStorage.setItem('arona-accent', c)
+  writeStorage(STORAGE_KEYS.accent, c)
 }, { immediate: true })
 
 // ---------- 文章组件解析 ----------
@@ -85,8 +120,9 @@ function postComponent(path?: string) {
   if (!path)
     return undefined
   const clean = path.replace(/\/$/, '')
-  const r = router.getRoutes().find(r => (r.path || '').replace(/\/$/, '') === clean)
-  return (r?.components?.default || undefined) as any
+  const record = router.getRoutes().find(r => (r.path || '').replace(/\/$/, '') === clean)
+  // 懒加载路由存的是 () => import(...)，必须包装后才能交给 <component :is>
+  return toRenderableComponent(record?.components?.default)
 }
 
 const currentPostComponent = computed(() =>
@@ -135,22 +171,31 @@ function syncWindows(openHomeWindow: boolean) {
   }
 }
 
-watch(() => route.path, () => syncWindows(false), { immediate: true })
+watch(
+  () => [route.path, route.query.app] as const,
+  () => {
+    if (applyAppRoute())
+      return
+    syncWindows(false)
+  },
+  { immediate: true },
+)
 watch(() => desktop.displayMode.value, () => syncWindows(true))
 watch(() => isMobile.value, () => syncWindows(true))
 
 onMounted(() => {
   // 挂载后应用 localStorage 中保存的显示模式（避免与 SSG 首屏水合冲突）
-  const savedMode = typeof localStorage !== 'undefined' ? localStorage.getItem('arona-article-mode') : null
+  const savedMode = readStorage(STORAGE_KEYS.articleMode)
   if (savedMode === 'fullscreen' || savedMode === 'window')
     desktop.setDisplayMode(savedMode)
 
-  const savedWindowStyle = typeof localStorage !== 'undefined' ? localStorage.getItem('arona-window-style') : null
+  const savedWindowStyle = readStorage(STORAGE_KEYS.windowStyle)
   if (savedWindowStyle === 'mac' || savedWindowStyle === 'windows')
     desktop.setWindowStyle(savedWindowStyle)
 
   // 确保首页窗口已打开（若模式未变化，上面的 watcher 不会触发）
-  syncWindows(true)
+  if (!applyAppRoute())
+    syncWindows(true)
 })
 
 // ---------- 窗口操作 ----------
@@ -173,33 +218,12 @@ function handleArticleFocus(id: string) {
   if (win && win.app === 'article' && win.postPath && win.postPath !== route.path)
     router.push(win.postPath)
 }
-
-// ---------- 壁纸 ----------
-// 亮暗两版壁纸分层叠加，明暗切换时交叉淡入淡出；
-// 未在 themeConfig 中配置壁纸时回退到主题内置壁纸
-const wallpaperConfig = computed(() => themeConfig.value.wallpaper || {})
-const useBuiltinWallpaper = computed(() => !wallpaperConfig.value.light && !wallpaperConfig.value.dark)
-const wallpaperLight = computed(() => wallpaperConfig.value.light || (useBuiltinWallpaper.value ? bgLight : ''))
-const wallpaperDark = computed(() => wallpaperConfig.value.dark || (useBuiltinWallpaper.value ? bgDark : ''))
-const wallpaperBlur = computed(() => !!wallpaperConfig.value.blur)
 </script>
 
 <template>
   <div class="desktop">
-    <!-- 壁纸：亮/暗两层交叉淡入淡出 -->
-    <div class="desktop__wallpaper" :class="{ 'is-blur': wallpaperBlur }">
-      <div
-        class="desktop__wallpaper-layer"
-        :class="{ 'is-on': !appStore.isDark || !wallpaperDark }"
-        :style="wallpaperLight ? { backgroundImage: `url(${wallpaperLight})` } : undefined"
-      />
-      <div
-        v-if="wallpaperDark"
-        class="desktop__wallpaper-layer"
-        :class="{ 'is-on': appStore.isDark }"
-        :style="{ backgroundImage: `url(${wallpaperDark})` }"
-      />
-    </div>
+    <GlobalWallpaper />
+    <WebWallpaperPerformanceDialog />
 
     <MenuBar />
 
@@ -266,37 +290,17 @@ const wallpaperBlur = computed(() => !!wallpaperConfig.value.blur)
   inset: 0;
   overflow: hidden;
   font-family: var(--va-font-family-base);
-  color: var(--va-c-text, #333);
-}
-
-.desktop__wallpaper {
-  position: absolute;
-  inset: 0;
-  animation: st-settle 0.9s var(--st-ease-out) backwards;
-  transition: filter 0.5s var(--st-ease-in-out);
-}
-
-.desktop__wallpaper.is-blur {
-  filter: blur(14px) brightness(0.9);
-  transform: scale(1.06);
-}
-
-.desktop__wallpaper-layer {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-
-.desktop__wallpaper-layer.is-on {
-  opacity: 1;
+  color: var(--va-c-text);
 }
 
 .desktop__stage {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+
+/* 桌面空白区域点击穿透到网页壁纸；窗口、菜单栏与 Dock 保持可交互 */
+.desktop__stage > :deep(.mac-window:not(.is-minimized):not(.is-closing)) {
+  pointer-events: auto;
 }
 </style>

@@ -6,3 +6,9 @@ html,
 body {
   overflow-x: hidden;
 }
+
+// 桌面壁纸由 GlobalWallpaper.vue 渲染，这里只保留基础盒模型
+body {
+  margin: 0;
+  min-height: 100vh;
+}

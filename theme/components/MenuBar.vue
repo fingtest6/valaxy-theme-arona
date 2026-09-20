@@ -2,8 +2,17 @@
 import { useAppStore, useSiteConfig } from 'valaxy'
 import { computed } from 'vue'
 import { useDesktop } from '../composables/desktop'
+import { useIsMobile } from '../composables/useIsMobile'
+import { useWebWallpaper } from '../composables/webWallpaper'
 
 const desktop = useDesktop()
+const isMobile = useIsMobile()
+const {
+  available: webWallpaperAvailable,
+  enabled: webWallpaperEnabled,
+  mobile: webWallpaperMobile,
+  toggle: toggleWebWallpaper,
+} = useWebWallpaper()
 const appStore = useAppStore()
 const siteConfig = useSiteConfig()
 
@@ -34,9 +43,20 @@ function toggleDark(e: MouseEvent) {
 
     <div class="menubar__right">
       <button
+        v-if="webWallpaperAvailable && (webWallpaperMobile || !isMobile)"
+        class="menubar__switch"
+        :class="{ 'is-on': webWallpaperEnabled }"
+        role="switch"
+        :aria-checked="webWallpaperEnabled"
+        :title="webWallpaperEnabled ? '关闭网页壁纸' : '开启网页壁纸'"
+        @click="toggleWebWallpaper"
+      >
+        <span class="menubar__switch-thumb" />
+      </button>
+      <button
         class="menubar__btn"
         title="设置"
-        :class="{ 'is-active': desktop.activeId.value === 'settings' }"
+        :class="{ 'is-active': desktop.activeWindow.value?.app === 'settings' }"
         @click="openSettings"
       >
         <i i-ri-settings-3-line />
@@ -66,10 +86,8 @@ function toggleDark(e: MouseEvent) {
   justify-content: space-between;
   padding: 0 12px;
   font-size: 13px;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   background: rgba(250, 250, 252, 0.55);
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   user-select: none;
   /* 开机自顶部滑入 */
@@ -153,7 +171,7 @@ html.dark .menubar {
   border: none;
   border-radius: 5px;
   background: transparent;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   cursor: pointer;
   font-size: 15px;
   transition:
@@ -173,5 +191,43 @@ html.dark .menubar {
 html.dark .menubar__btn:hover,
 html.dark .menubar__btn.is-active {
   background: rgba(255, 255, 255, 0.12);
+}
+
+.menubar__switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 18px;
+  margin-right: 2px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menubar__switch.is-on {
+  background: var(--st-accent);
+}
+
+.menubar__switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.menubar__switch.is-on .menubar__switch-thumb {
+  transform: translateX(16px);
+}
+
+html.dark .menubar__switch {
+  background: rgba(255, 255, 255, 0.18);
 }
 </style>

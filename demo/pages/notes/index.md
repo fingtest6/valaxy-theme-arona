@@ -1,5 +1,5 @@
 ---
-title: Dev Notes
+title: 笔记
 ---
 
-How about writing some dev notes?
+这里写什么呢？

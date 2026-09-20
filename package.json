@@ -4,17 +4,17 @@
   "packageManager": "pnpm@10.18.2",
   "homepage": "https://valaxy.site",
   "scripts": {
-    "build": "npm run build:demo",
-    "build:demo": "npm -C demo run build",
+    "build": "pnpm run build:demo",
+    "build:demo": "pnpm -C demo run build",
     "ci:publish": "pnpm -r publish --access public --no-git-checks",
-    "dev": "npm run demo",
-    "demo": "npm -C demo run dev",
+    "dev": "pnpm run demo",
+    "demo": "pnpm -C demo run dev",
     "lint": "eslint .",
     "release": "cd theme && git add -A && bumpp --all",
     "typecheck": "vue-tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
-    "valaxy": "^1.0.0-rc.11"
+    "valaxy": "^1.0.0-rc.12"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.4.1",
@@ -23,13 +23,14 @@
     "eslint": "^9.37.0",
     "eslint-plugin-format": "^1.0.2",
     "typescript": "^5.9.3",
-    "unocss": "^0.62.0",
+    "unocss": "^66.5.3",
     "vitest": "^3.2.4",
+    "vue": "^3.5.41",
     "vue-tsc": "^3.1.1"
   },
   "pnpm": {
     "patchedDependencies": {
-      "valaxy@1.0.0-rc.11": "patches/valaxy@1.0.0-rc.11.patch"
+      "valaxy@1.0.0-rc.12": "patches/valaxy@1.0.0-rc.12.patch"
     }
   }
 }

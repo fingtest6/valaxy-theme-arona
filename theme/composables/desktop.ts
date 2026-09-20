@@ -1,11 +1,19 @@
 import type { Post } from 'valaxy'
 import { computed, reactive } from 'vue'
+import { DOCK_HEIGHT, MENUBAR_HEIGHT, MOBILE_BREAKPOINT, ST_DEFAULT_ACCENT } from '../shared/layout'
 
-export type AppId = 'articles' | 'archive' | 'search' | 'friends' | 'about' | 'settings' | 'browser'
+export type AppId = 'articles' | 'files' | 'notes' | 'album' | 'archive' | 'search' | 'friends' | 'about' | 'settings' | 'browser'
 
 export type ArticleDisplayMode = 'fullscreen' | 'window'
 
 export type WindowStyle = 'mac' | 'windows'
+
+/**
+ * 打开文章窗口所需的最小字段
+ *
+ * 完整 `Post` 只在文章路由下存在；文件 / 搜索应用只提供路径与标题。
+ */
+export type ArticleInput = Partial<Post> & { path?: string }
 
 export interface DesktopWindow {
   id: string
@@ -26,7 +34,7 @@ export interface DesktopWindow {
    * 文章窗口对应的文章路径
    */
   postPath?: string
-  post?: Post
+  post?: ArticleInput
   /**
    * 窗口正在播放关闭动画，稍后从列表移除；期间再次打开可取消关闭
    */
@@ -37,6 +45,8 @@ export interface AppMeta {
   id: AppId
   title: string
   icon: string
+  /** Dock 图标底色（与应用定义放在一起，避免再维护一份平行映射） */
+  color: string
   defaultWidth: number
   defaultHeight: number
 }
@@ -45,18 +55,22 @@ export interface AppMeta {
  * 固定任务栏应用
  */
 export const APPS: AppMeta[] = [
-  { id: 'articles', title: '文章', icon: 'i-ri-file-list-3-line', defaultWidth: 560, defaultHeight: 640 },
-  { id: 'archive', title: '归档', icon: 'i-ri-archive-line', defaultWidth: 640, defaultHeight: 620 },
-  { id: 'search', title: '搜索', icon: 'i-ri-search-line', defaultWidth: 600, defaultHeight: 620 },
-  { id: 'friends', title: '友链', icon: 'i-ri-links-line', defaultWidth: 560, defaultHeight: 560 },
-  { id: 'about', title: '关于', icon: 'i-ri-information-line', defaultWidth: 520, defaultHeight: 520 },
-  { id: 'browser', title: '浏览器', icon: 'i-ri-globe-line', defaultWidth: 960, defaultHeight: 640 },
+  { id: 'articles', title: '文章', icon: 'i-ri-file-list-3-line', color: 'linear-gradient(135deg, #2f80ed, #56ccf2)', defaultWidth: 560, defaultHeight: 640 },
+  { id: 'files', title: '文件', icon: 'i-ri-folder-open-line', color: 'linear-gradient(135deg, #f59e0b, #fbbf24)', defaultWidth: 660, defaultHeight: 600 },
+  { id: 'notes', title: '笔记', icon: 'i-ri-sticky-note-line', color: 'linear-gradient(135deg, #14b8a6, #2dd4bf)', defaultWidth: 700, defaultHeight: 600 },
+  { id: 'album', title: '相册', icon: 'i-ri-gallery-line', color: 'linear-gradient(135deg, #ec4899, #f472b6)', defaultWidth: 780, defaultHeight: 620 },
+  { id: 'archive', title: '归档', icon: 'i-ri-archive-line', color: 'linear-gradient(135deg, #f2994a, #f2c94c)', defaultWidth: 640, defaultHeight: 620 },
+  { id: 'search', title: '搜索', icon: 'i-ri-search-line', color: 'linear-gradient(135deg, #6366f1, #818cf8)', defaultWidth: 600, defaultHeight: 620 },
+  { id: 'friends', title: '友链', icon: 'i-ri-links-line', color: 'linear-gradient(135deg, #9b51e0, #bb6bd9)', defaultWidth: 560, defaultHeight: 560 },
+  { id: 'about', title: '关于', icon: 'i-ri-information-line', color: 'linear-gradient(135deg, #27ae60, #6fcf97)', defaultWidth: 520, defaultHeight: 520 },
+  { id: 'browser', title: '浏览器', icon: 'i-ri-globe-line', color: 'linear-gradient(135deg, #00b4d8, #90e0ef)', defaultWidth: 960, defaultHeight: 640 },
 ]
 
 const SETTINGS_META: AppMeta = {
   id: 'settings',
   title: '设置',
   icon: 'i-ri-settings-3-line',
+  color: 'linear-gradient(135deg, #6b7280, #9ca3af)',
   defaultWidth: 480,
   defaultHeight: 460,
 }
@@ -65,6 +79,15 @@ const APP_META_MAP = new Map<AppId, AppMeta>([
   ...APPS.map(a => [a.id, a] as const),
   ['settings', SETTINGS_META],
 ])
+
+const APP_IDS = new Set<AppId>([
+  ...APPS.map(a => a.id),
+  SETTINGS_META.id,
+])
+
+export function isAppId(value: unknown): value is AppId {
+  return typeof value === 'string' && APP_IDS.has(value as AppId)
+}
 
 let uid = 0
 let modeInitialized = false
@@ -84,7 +107,7 @@ const state = reactive({
   windows: [] as DesktopWindow[],
   zCounter: 10,
   activeId: '',
-  accent: '#0078E7',
+  accent: ST_DEFAULT_ACCENT,
   displayMode: 'fullscreen' as ArticleDisplayMode,
   windowStyle: 'mac' as WindowStyle,
   browserUnlocked: false,
@@ -95,21 +118,19 @@ const closeTimers = new Map<string, ReturnType<typeof setTimeout>>()
 function centerCoords(width: number, height: number) {
   const w = typeof window !== 'undefined' ? window.innerWidth : 1280
   const h = typeof window !== 'undefined' ? window.innerHeight : 800
-  // 菜单栏与 Dock 占据的空间
-  const menuBar = 32
-  const dock = 96
-  const usableH = h - menuBar - dock
+  // 菜单栏与 Dock 占据的空间（与 --st-menubar-h / --st-dock-h 保持一致）
+  const usableH = h - MENUBAR_HEIGHT - DOCK_HEIGHT
   return {
     x: Math.round(Math.max(8, (w - width) / 2)),
-    y: Math.round(menuBar + Math.max(8, (usableH - height) / 2)),
+    y: Math.round(MENUBAR_HEIGHT + Math.max(8, (usableH - height) / 2)),
   }
 }
 
 /**
- * 移动端视口（与 useMobile 的 768px 断点保持一致）
+ * 移动端视口（与 useIsMobile 的断点保持一致）
  */
 function isMobileViewport() {
-  return typeof window !== 'undefined' && window.innerWidth <= 768
+  return typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT
 }
 
 /**
@@ -247,7 +268,7 @@ export function useDesktop() {
   /**
    * 打开文章窗口（窗口模式）。同一路径去重聚焦，可同时打开多篇。
    */
-  function openArticle(post: Post) {
+  function openArticle(post: ArticleInput) {
     const path = post.path || ''
     const existing = state.windows.find(w => w.app === 'article' && w.postPath === path)
     if (existing) {

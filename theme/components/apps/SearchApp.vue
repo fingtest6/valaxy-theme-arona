@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import type { FuseListItem } from 'valaxy'
-import type { Ref } from 'vue'
 import { useFuseSearch } from 'valaxy'
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDesktop } from '../../composables/desktop'
+import { formatDate, stripHtml } from '../../utils/format'
 
-interface SearchResultItem {
-  item: FuseListItem & { content?: string, date?: string }
-  matches?: unknown[]
-  score?: number
-}
+/** 搜索结果条目：fuse 索引里额外带正文与日期 */
+type SearchItem = FuseListItem & { content?: string, date?: string }
 
 const desktop = useDesktop()
 const router = useRouter()
@@ -18,11 +15,8 @@ const keyword = ref('')
 const inputRef = ref<HTMLInputElement>()
 const loading = ref(false)
 
-const search = useFuseSearch(() => keyword.value) as unknown as {
-  results: Readonly<Ref<SearchResultItem[]>>
-  fetchFuseListData: (path?: string) => Promise<void>
-}
-const results = computed<SearchResultItem[]>(() => search.results.value || [])
+const search = useFuseSearch<SearchItem>(() => keyword.value)
+const results = computed(() => search.results.value || [])
 const resultCount = computed(() => results.value.length)
 
 onMounted(async () => {
@@ -43,24 +37,14 @@ onMounted(async () => {
 function openLink(link: string) {
   if (!link)
     return
-  desktop.openArticle({ path: link } as any)
+  desktop.openArticle({ path: link })
   router.push(link)
-}
-
-function formatDate(d: string | number | Date | undefined) {
-  if (!d)
-    return ''
-  return new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
-}
-
-function plainText(text: unknown): string {
-  return String(text || '').replace(/<[^>]*>/g, '').trim()
 }
 
 /**
  * 从文章全文里截取关键词附近的片段
  */
-function contentSnippet(item: any): string {
+function contentSnippet(item: SearchItem): string {
   const kw = keyword.value.trim()
   if (!kw || !item.content)
     return ''
@@ -115,7 +99,7 @@ function highlight(text: string): string {
         <h3 class="search-result__title" v-html="highlight(String(r.item.title || ''))" />
         <p v-if="keyword && contentSnippet(r.item)" class="search-result__snippet" v-html="highlight(contentSnippet(r.item))" />
         <p v-else-if="r.item.excerpt" class="search-result__excerpt">
-          {{ plainText(r.item.excerpt) }}
+          {{ stripHtml(r.item.excerpt) }}
         </p>
         <div class="search-result__meta">
           <time v-if="r.item.date">{{ formatDate(r.item.date) }}</time>
@@ -146,11 +130,11 @@ function highlight(text: string): string {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--st-app-bg);
 }
 
 html.dark .search-app {
-  background: rgba(24, 24, 28, 0.4);
+  background: var(--st-app-bg-dark);
 }
 
 .search-app__toolbar {
@@ -179,7 +163,7 @@ html.dark .search-app__toolbar {
 }
 
 .search-app__input-wrap:focus-within {
-  box-shadow: 0 0 0 2px var(--st-accent, #0078e7);
+  box-shadow: 0 0 0 2px var(--st-accent);
 }
 
 html.dark .search-app__input-wrap {
@@ -198,7 +182,7 @@ html.dark .search-app__input-wrap {
   outline: none;
   background: transparent;
   font-size: 15px;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
 }
 
 .search-app__clear {
@@ -340,12 +324,6 @@ html.dark .search-app__empty {
 }
 
 .search-app__spinner {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  animation: st-spin 1s linear infinite;
 }
 </style>

@@ -71,7 +71,7 @@ const sponsorMethods = computed(() => sponsor.value?.methods || [])
         >
           <div
             class="about-app__sponsor-method-name"
-            :style="{ color: method.color || 'var(--st-accent, #0078e7)' }"
+            :style="{ color: method.color || 'var(--st-accent)' }"
           >
             <i v-if="method.icon" :class="method.icon" />
             {{ method.name }}
@@ -102,11 +102,11 @@ const sponsorMethods = computed(() => sponsor.value?.methods || [])
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--st-app-bg);
 }
 
 html.dark .about-app {
-  background: rgba(24, 24, 28, 0.4);
+  background: var(--st-app-bg-dark);
 }
 
 .about-app__hero {
@@ -127,7 +127,7 @@ html.dark .about-app {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2f80ed, #56ccf2);
+  background: var(--st-avatar-gradient);
   color: #fff;
   font-size: 34px;
   font-weight: 800;
@@ -178,7 +178,7 @@ html.dark .about-app__desc {
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   transition:
     background 0.15s ease,
     translate 0.2s var(--st-ease-out),
@@ -262,7 +262,7 @@ html.dark .about-app__sponsor-desc {
   min-width: 132px;
   padding: 10px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--st-app-bg);
 }
 
 html.dark .about-app__sponsor-method {
@@ -328,7 +328,7 @@ html.dark .about-app__footer {
 }
 
 .about-app__footer a {
-  color: var(--st-accent, #0078e7);
+  color: var(--st-accent);
   text-decoration: none;
 }
 </style>

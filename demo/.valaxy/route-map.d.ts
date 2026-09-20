@@ -44,34 +44,6 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
-    '/about': RouteRecordInfo<
-      '/about',
-      '/about',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/archives/': RouteRecordInfo<
-      '/archives/',
-      '/archives',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/categories/': RouteRecordInfo<
-      '/categories/',
-      '/categories',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/notes/': RouteRecordInfo<
-      '/notes/',
-      '/notes',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     '/posts/themetest': RouteRecordInfo<
       '/posts/themetest',
       '/posts/themetest',
@@ -128,13 +100,6 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/tags/': RouteRecordInfo<
-      '/tags/',
-      '/tags',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
   }
 
   /**
@@ -154,33 +119,9 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    '../node_modules/.pnpm/valaxy@1.0.0-rc.11_patch_ha_bf928873db5f0bfc2221140e199aac04/node_modules/valaxy/client/pages/[...path].vue': {
+    '../node_modules/.pnpm/valaxy@1.0.0-rc.12_patch_ha_abc0967523226c9ef1ee0d651a857c20/node_modules/valaxy/client/pages/[...path].vue': {
       routes:
         | '/[...path]'
-      views:
-        | never
-    }
-    'pages/about.md': {
-      routes:
-        | '/about'
-      views:
-        | never
-    }
-    'pages/archives/index.md': {
-      routes:
-        | '/archives/'
-      views:
-        | never
-    }
-    'pages/categories/index.md': {
-      routes:
-        | '/categories/'
-      views:
-        | never
-    }
-    'pages/notes/index.md': {
-      routes:
-        | '/notes/'
       views:
         | never
     }
@@ -229,12 +170,6 @@ declare module 'vue-router/auto-routes' {
     'pages/posts/themetest-8.md': {
       routes:
         | '/posts/themetest-8'
-      views:
-        | never
-    }
-    'pages/tags/index.md': {
-      routes:
-        | '/tags/'
       views:
         | never
     }

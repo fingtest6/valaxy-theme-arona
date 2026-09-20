@@ -19,6 +19,14 @@ export default defineConfig<ThemeConfig>({
     windowStyle: 'mac',
     // 是否启用浏览器彩蛋
     browserEasterEgg: true,
+
+    // 部分App开关  文件 笔记 相册
+    apps: {
+      files: true,
+      notes: true,
+      album: true,
+    },
+
     // 友情链接设置
     friends: [
       {
@@ -41,7 +49,16 @@ export default defineConfig<ThemeConfig>({
       },
     ],
     wallpaper: {
+      // 静态图片兜底（网页壁纸加载前显示）
       blur: false,
+      // 网页壁纸：资源目录为 demo/wallpaper（不在 public，禁用后不会输出）
+      web: {
+        enable: true,
+        // 生产环境注册 Service Worker，二次访问秒开
+        cache: true,
+        // 网页壁纸可交互（默认开启），窗口仍可正常操作
+        interactive: true,
+      },
     },
 
     footer: {

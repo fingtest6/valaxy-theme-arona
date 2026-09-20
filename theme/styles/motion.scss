@@ -111,6 +111,13 @@
   }
 }
 
+/* 载入旋转（转圈图标） */
+@keyframes st-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
 /* 尊重系统「减弱动态效果」偏好 */
 @media (prefers-reduced-motion: reduce) {
   *,

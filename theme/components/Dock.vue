@@ -1,21 +1,25 @@
 <script setup lang="ts">
+import type { AppId } from '../composables/desktop'
 import { computed, ref } from 'vue'
 import { useThemeConfig } from '../composables'
 import { APPS, useDesktop } from '../composables/desktop'
 import { useIsMobile } from '../composables/useIsMobile'
+import { isAppEnabled } from '../shared/apps'
 
 const desktop = useDesktop()
 const isMobile = useIsMobile()
 const themeConfig = useThemeConfig()
 
-const APP_COLORS: Record<string, string> = {
-  articles: 'linear-gradient(135deg, #2f80ed, #56ccf2)',
-  archive: 'linear-gradient(135deg, #f2994a, #f2c94c)',
-  search: 'linear-gradient(135deg, #6366f1, #818cf8)',
-  friends: 'linear-gradient(135deg, #9b51e0, #bb6bd9)',
-  about: 'linear-gradient(135deg, #27ae60, #6fcf97)',
-  browser: 'linear-gradient(135deg, #00b4d8, #90e0ef)',
-}
+// 有窗口处于最大化/全屏状态时，Dock 自动向下隐藏
+const autoHide = computed(() =>
+  desktop.windows.value.some(w => !w.minimized && w.maximized),
+)
+
+const dockApps = computed(() => {
+  const apps = APPS.filter(app => isAppEnabled(app.id, themeConfig.value.apps))
+  const showBrowser = themeConfig.value.browserEasterEgg !== false && desktop.browserUnlocked.value
+  return showBrowser ? apps : apps.filter(app => app.id !== 'browser')
+})
 
 // ---------- Dock 波纹放大 ----------
 // 悬停时按与鼠标的横向距离对图标做平滑衰减放大，模拟 macOS Dock 的呼吸感
@@ -28,7 +32,9 @@ const scales = ref<number[]>([])
 let iconCenters: number[] = []
 
 function measureCenters() {
-  iconCenters = iconRefs.value.map((el) => {
+  // 按当前应用数量生成，避免 v-for 缩短后残留旧索引
+  iconCenters = dockApps.value.map((_, i) => {
+    const el = iconRefs.value[i]
     if (!el)
       return Number.POSITIVE_INFINITY
     const rect = el.getBoundingClientRect()
@@ -44,7 +50,7 @@ function onDockMove(e: MouseEvent) {
   if (isMobile.value)
     return
   // 图标数量变化（如解锁彩蛋）时重新测量
-  if (iconCenters.length !== iconRefs.value.length)
+  if (iconCenters.length !== dockApps.value.length)
     measureCenters()
   scales.value = iconCenters.map((center) => {
     const distance = Math.abs(e.clientX - center)
@@ -63,20 +69,7 @@ function iconStyle(index: number) {
   return scale ? { scale: scale.toFixed(3) } : undefined
 }
 
-// 有窗口处于最大化/全屏状态时，Dock 自动向下隐藏
-const autoHide = computed(() =>
-  desktop.windows.value.some(w => !w.minimized && w.maximized),
-)
-
-const dockApps = computed(() => {
-  if (themeConfig.value.browserEasterEgg === false)
-    return APPS.filter(a => a.id !== 'browser')
-  return desktop.browserUnlocked.value
-    ? APPS
-    : APPS.filter(a => a.id !== 'browser')
-})
-
-function onClick(appId: string) {
+function onClick(appId: AppId) {
   // 文章应用：全屏模式（或移动端）打开阅读器，窗口模式打开列表
   const isReaderTarget = appId === 'articles' && (isMobile.value || desktop.displayMode.value === 'fullscreen')
   const targetApp = isReaderTarget ? 'reader' : appId
@@ -86,7 +79,7 @@ function onClick(appId: string) {
     if (isReaderTarget)
       desktop.openReader()
     else
-      desktop.openApp(appId as any)
+      desktop.openApp(appId)
     return
   }
   if (existing.minimized) {
@@ -118,7 +111,7 @@ function onClick(appId: string) {
       >
         <div
           class="dock__icon"
-          :style="{ background: APP_COLORS[app.id], ...iconStyle(i) }"
+          :style="{ background: app.color, ...iconStyle(i) }"
         >
           <i :class="app.icon" />
         </div>
@@ -159,8 +152,6 @@ function onClick(appId: string) {
   padding: 8px 10px;
   border-radius: 22px;
   background: rgba(250, 250, 252, 0.55);
-  backdrop-filter: blur(26px) saturate(180%);
-  -webkit-backdrop-filter: blur(26px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.24);
 }
@@ -176,6 +167,7 @@ html.dark .dock__inner {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
   border: none;
   background: transparent;
   padding: 0;
@@ -256,6 +248,13 @@ html.dark .dock__dot.is-active {
 .dock.is-mobile .dock__inner {
   gap: 8px;
   padding: 6px 8px;
+  max-width: calc(100vw - 12px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dock.is-mobile .dock__inner::-webkit-scrollbar {
+  display: none;
 }
 
 .dock.is-mobile .dock__icon {

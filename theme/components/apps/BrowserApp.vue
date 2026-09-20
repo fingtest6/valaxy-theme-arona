@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
-const currentUrl = typeof window !== 'undefined' ? window.location.href : 'about:blank'
+// SSR 与水合首帧使用同一占位值，真实地址在挂载后写入，避免水合不一致
+const PLACEHOLDER_URL = 'about:blank'
+
+const currentUrl = ref(PLACEHOLDER_URL)
 const iframeKey = ref(0)
 
 function buildBrowserUrl(raw: string) {
@@ -20,8 +23,14 @@ function buildBrowserUrl(raw: string) {
   }
 }
 
-const url = ref(buildBrowserUrl(currentUrl))
-const inputUrl = ref(currentUrl)
+const url = ref(PLACEHOLDER_URL)
+const inputUrl = ref(PLACEHOLDER_URL)
+
+onMounted(() => {
+  currentUrl.value = window.location.href
+  inputUrl.value = currentUrl.value
+  url.value = buildBrowserUrl(currentUrl.value)
+})
 
 function normalizeUrl(raw: string) {
   const value = raw.trim()
@@ -49,8 +58,8 @@ function refresh() {
 }
 
 function goHome() {
-  inputUrl.value = currentUrl
-  url.value = buildBrowserUrl(currentUrl)
+  inputUrl.value = currentUrl.value
+  url.value = buildBrowserUrl(currentUrl.value)
   iframeKey.value += 1
 }
 </script>
@@ -123,7 +132,7 @@ html.dark .browser-app__toolbar {
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   font-size: 16px;
   cursor: pointer;
   transition: background 0.15s ease;

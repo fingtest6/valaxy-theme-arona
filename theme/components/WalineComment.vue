@@ -43,8 +43,8 @@ const commentEnabled = useCommentEnabled()
 :root {
   /* 字体大小和主题颜色 */
   --waline-font-size: 16px;
-  --waline-theme-color: var(--st-accent, #0078e7);
-  --waline-active-color: var(--st-accent, #0078e7);
+  --waline-theme-color: var(--st-accent);
+  --waline-active-color: var(--st-accent);
 }
 
 html.dark {
@@ -52,7 +52,7 @@ html.dark {
   --waline-info-bg-color: rgba(133, 133, 133, 0.55);
   --waline-info-color: #ffffff;
   --waline-color: #ffffff;
-  --waline-bg-color: rgba(184, 9, 9, 0);
+  --waline-bg-color: transparent;
   --waline-bg-color-light: rgba(0, 0, 0, 0.05);
   --waline-border-color: rgba(0, 0, 0, 0.67);
 }

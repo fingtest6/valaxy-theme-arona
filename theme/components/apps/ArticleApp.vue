@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import type { Post } from 'valaxy'
-import { computed, onMounted, onUpdated, ref } from 'vue'
+import type { Component } from 'vue'
+import type { ArticleInput } from '../../composables/desktop'
+import { computed, onBeforeUnmount, onMounted, onUpdated, ref } from 'vue'
+import { getArticleSnapshot, setArticleSnapshot } from '../../composables/articleSnapshot'
 import { useCommentEnabled } from '../../composables/comment'
 import { resolveTitle } from '../../composables/desktop'
 
 const props = defineProps<{
-  post?: Post
-  component?: any
+  post?: ArticleInput
+  component?: Component
   /**
    * 是否为当前激活的文章窗口（与路由一致），激活时渲染实时内容
    */
@@ -16,37 +18,45 @@ const props = defineProps<{
 const commentEnabled = useCommentEnabled()
 const showComments = computed(() => commentEnabled.value && props.post?.comment !== false)
 
-// 冻结快照缓存：path -> 渲染后的 HTML（模块级，跨窗口实例共享）
-const snapshotCache = new Map<string, string>()
-
 const contentRef = ref<HTMLElement>()
 const snapshotHtml = ref('')
+
+/** 异步编译的组件渲染完成后再次捕获 */
+const CAPTURE_DELAYS = [120, 500]
+const mountTimers: Array<ReturnType<typeof setTimeout>> = []
+let updateTimer: ReturnType<typeof setTimeout> | undefined
 
 function capture() {
   if (!props.active || !contentRef.value)
     return
   const html = contentRef.value.innerHTML
-  if (html && html.trim()) {
-    snapshotCache.set(props.post?.path || '', html)
-    snapshotHtml.value = html
-  }
+  if (!html || !html.trim())
+    return
+  setArticleSnapshot(props.post?.path || '', html)
+  snapshotHtml.value = html
 }
 
 onMounted(() => {
-  if (props.active) {
-    capture()
-    // 异步编译组件渲染完成后再次捕获
-    setTimeout(capture, 120)
-    setTimeout(capture, 500)
+  if (!props.active) {
+    snapshotHtml.value = getArticleSnapshot(props.post?.path || '')
+    return
   }
-  else {
-    snapshotHtml.value = snapshotCache.get(props.post?.path || '') || ''
-  }
+  capture()
+  CAPTURE_DELAYS.forEach(delay => mountTimers.push(setTimeout(capture, delay)))
 })
 
 onUpdated(() => {
-  if (props.active)
-    setTimeout(capture, 0)
+  if (!props.active)
+    return
+  // 合并高频更新，避免每次 update 都排一个新定时器
+  clearTimeout(updateTimer)
+  updateTimer = setTimeout(capture, 0)
+})
+
+onBeforeUnmount(() => {
+  mountTimers.forEach(clearTimeout)
+  mountTimers.length = 0
+  clearTimeout(updateTimer)
 })
 
 const fallbackTitle = computed(() => resolveTitle(props.post?.title))
@@ -84,11 +94,11 @@ const pendingTags = computed(() =>
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--st-app-bg);
 }
 
 html.dark .article-app {
-  background: rgba(24, 24, 28, 0.4);
+  background: var(--st-app-bg-dark);
 }
 
 .article-app__scroll {
@@ -139,15 +149,12 @@ html.dark .article-app__pending {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--va-c-primary, #0078e7);
-  background: rgba(0, 120, 231, 0.12);
-  background: color-mix(in srgb, var(--va-c-primary, #0078e7) 12%, transparent);
+  color: var(--st-accent);
+  background: color-mix(in srgb, var(--st-accent) 12%, transparent);
 }
 
 html.dark .article-app__pending-tag {
-  color: var(--va-c-primary, #4ea1ff);
-  background: rgba(78, 161, 255, 0.18);
-  background: color-mix(in srgb, var(--va-c-primary, #4ea1ff) 18%, transparent);
+  background: color-mix(in srgb, var(--st-accent) 18%, transparent);
 }
 
 .article-app__pending-hint {

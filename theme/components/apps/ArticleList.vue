@@ -3,6 +3,7 @@ import type { Post } from 'valaxy'
 import { usePostList } from 'valaxy'
 import { computed, ref } from 'vue'
 import { resolveTitle } from '../../composables/desktop'
+import { formatDate, stripHtml } from '../../utils/format'
 
 const emit = defineEmits<{
   (e: 'open', post: Post): void
@@ -16,18 +17,12 @@ const filteredPosts = computed(() => {
   if (!kw)
     return posts.value
   return posts.value.filter((p) => {
-    const title = String(resolveTitle(p.title)).toLowerCase()
-    const excerpt = String(p.excerpt || '').toLowerCase()
+    const title = resolveTitle(p.title).toLowerCase()
+    const excerpt = stripHtml(p.excerpt).toLowerCase()
     const tags = Array.isArray(p.tags) ? p.tags.join(' ').toLowerCase() : ''
     return title.includes(kw) || excerpt.includes(kw) || tags.includes(kw)
   })
 })
-
-function formatDate(d: Post['date']) {
-  if (!d)
-    return ''
-  return new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
-}
 </script>
 
 <template>
@@ -46,7 +41,7 @@ function formatDate(d: Post['date']) {
         @click="emit('open', post)"
       >
         <span class="article-list__title">{{ resolveTitle(post.title) }}</span>
-        <span v-if="post.excerpt" class="article-list__excerpt">{{ String(post.excerpt).replace(/<[^>]*>/g, '').trim() }}</span>
+        <span v-if="post.excerpt" class="article-list__excerpt">{{ stripHtml(post.excerpt) }}</span>
         <span class="article-list__meta">
           <time v-if="post.date">{{ formatDate(post.date) }}</time>
           <span v-if="Array.isArray(post.tags) && post.tags.length" class="article-list__tags">
@@ -97,7 +92,7 @@ html.dark .article-list__search {
   outline: none;
   background: transparent;
   font-size: 14px;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
 }
 
 .article-list__scroll {

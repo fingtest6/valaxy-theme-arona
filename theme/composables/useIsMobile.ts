@@ -1,19 +1,18 @@
 import { useAppStore } from 'valaxy'
 import { computed, ref } from 'vue'
-
-const QUERY = '(max-width: 768px)'
+import { MOBILE_BREAKPOINT } from '../shared/layout'
 
 // 事件驱动的视口检测：matchMedia change + resize 双保险，模块级共享，无轮询
 const directMobile = ref(false)
 
 function updateDirect() {
-  directMobile.value = typeof window !== 'undefined' && window.innerWidth <= 768
+  directMobile.value = typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT
 }
 
 if (typeof window !== 'undefined') {
   updateDirect()
   if (typeof matchMedia !== 'undefined')
-    matchMedia(QUERY).addEventListener('change', updateDirect)
+    matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).addEventListener('change', updateDirect)
   // resize 兜底（覆盖 matchMedia 事件不可用的环境）
   window.addEventListener('resize', updateDirect, { passive: true })
 }

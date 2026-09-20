@@ -32,11 +32,11 @@ function openPost(post: Post) {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--st-app-bg);
 }
 
 html.dark .articles-app {
-  background: rgba(24, 24, 28, 0.4);
+  background: var(--st-app-bg-dark);
 }
 
 .articles-app__status {

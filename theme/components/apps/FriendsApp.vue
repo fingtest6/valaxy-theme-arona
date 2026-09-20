@@ -73,11 +73,11 @@ const friends = computed<Friend[]>(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--st-app-bg);
 }
 
 html.dark .friends-app {
-  background: rgba(24, 24, 28, 0.4);
+  background: var(--st-app-bg-dark);
 }
 
 .friends-app__header {
@@ -122,7 +122,7 @@ html.dark .friends-app__header {
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.04);
   text-decoration: none;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   animation: st-fade-up var(--st-dur-slow) var(--st-ease-out) backwards;
   animation-delay: calc(var(--stagger-i, 0) * 40ms);
   transition:
@@ -157,7 +157,7 @@ html.dark .friend-card:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2f80ed, #56ccf2);
+  background: var(--st-avatar-gradient);
   color: #fff;
   font-weight: 700;
   font-size: 18px;

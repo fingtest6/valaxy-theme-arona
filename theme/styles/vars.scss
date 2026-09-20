@@ -1,22 +1,15 @@
-@use 'sass:map';
-
-// common
-$common: () !default;
-$common: map.merge((), $common);
-
-// palette
+// 主题调色板
+//
+// 可通过 `@use './vars' with ($light: (...), $dark: (...))` 覆盖。
+// 强调色由 Desktop.vue 在运行时写入 `--st-c-brand`，
+// 此处仅提供 SSR / 首屏兜底值（需与 shared/layout.ts 的 ST_DEFAULT_ACCENT 保持一致）。
 $light: (
   'c-brand': #0078e7,
   'c-link': 'var(--st-c-brand)',
 
   'c-text': #101820,
 ) !default;
-$light: map.merge((), $light);
 
 $dark: (
   'c-text': #f0f8ff,
 ) !default;
-$dark: map.merge((), $dark);
-
-$z-index: () !default;
-$z-index: map.merge((), $z-index);

@@ -2,24 +2,17 @@
 import type { PageData, Post } from 'valaxy'
 import { formatDate } from 'valaxy'
 import { computed } from 'vue'
+import { resolveTitle } from '../composables/desktop'
 
 const props = defineProps<{
   frontmatter: Post
   data?: PageData
 }>()
 
-const title = computed(() => {
-  const t = props.frontmatter?.title
-  if (!t)
-    return ''
-  if (typeof t === 'string')
-    return t
-  if (typeof t === 'object') {
-    const o = t as Record<string, string>
-    return o.zh || o['zh-CN'] || o.en || o.default || Object.values(o)[0] || ''
-  }
-  return String(t)
-})
+// 复用共享的标题解析；空标题保持空串（resolveTitle 自身会回退到「未命名」）
+const title = computed(() =>
+  props.frontmatter?.title ? resolveTitle(props.frontmatter.title) : '',
+)
 
 const dateText = computed(() => {
   const d = props.frontmatter?.date
@@ -63,7 +56,7 @@ const tags = computed(() =>
 .article-view {
   font-size: 16px;
   line-height: 1.75;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
 }
 
 .article-view__header {
@@ -115,14 +108,11 @@ html.dark .article-view__meta {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--va-c-primary, #0078e7);
-  background: rgba(0, 120, 231, 0.12);
-  background: color-mix(in srgb, var(--va-c-primary, #0078e7) 12%, transparent);
+  color: var(--st-accent);
+  background: color-mix(in srgb, var(--st-accent) 12%, transparent);
 }
 
 html.dark .article-view__tag {
-  color: var(--va-c-primary, #4ea1ff);
-  background: rgba(78, 161, 255, 0.18);
-  background: color-mix(in srgb, var(--va-c-primary, #4ea1ff) 18%, transparent);
+  background: color-mix(in srgb, var(--st-accent) 18%, transparent);
 }
 </style>

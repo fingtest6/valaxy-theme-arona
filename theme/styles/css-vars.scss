@@ -10,11 +10,13 @@
   --st-dock-h: 84px;
   --st-accent: var(--st-c-brand);
 
-  @include set-css-var-from-map($common);
-  @include set-css-var-from-map($z-index, 'z');
-}
+  // 应用窗口玻璃面板（各 App 共用，避免重复声明）
+  --st-app-bg: rgba(255, 255, 255, 0.24);
+  --st-app-bg-dark: rgba(24, 24, 28, 0.26);
 
-:root {
+  // 头像 / 图标渐变（关于页、友链、阅读器欢迎页共用）
+  --st-avatar-gradient: linear-gradient(135deg, #2f80ed, #56ccf2);
+
   @include set-css-var-from-map($light);
 }
 

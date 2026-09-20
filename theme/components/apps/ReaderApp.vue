@@ -85,19 +85,30 @@ function goBack() {
 
       <!-- 正文与评论在同一滚动容器内，跟随滚动 -->
       <div class="reader__mobile-scroll">
-        <Transition name="reader-page" mode="out-in">
-          <div :key="currentPath" class="reader__content reader__content--mobile">
-            <component :is="component" />
-          </div>
-        </Transition>
+        <template v-if="component">
+          <Transition name="reader-page" mode="out-in">
+            <div :key="currentPath" class="reader__content reader__content--mobile">
+              <component :is="component" />
+            </div>
+          </Transition>
 
-        <aside v-if="showComments" class="reader__comments reader__comments--mobile">
-          <div class="reader__comments-title">
-            <i i-ri-chat-3-line />
-            评论
+          <aside v-if="showComments" class="reader__comments reader__comments--mobile">
+            <div class="reader__comments-title">
+              <i i-ri-chat-3-line />
+              评论
+            </div>
+            <WalineComment :path="currentPath" />
+          </aside>
+        </template>
+
+        <!-- 路由已切换但组件尚未解析完成：给出占位，避免把 undefined 交给 :is -->
+        <div v-else class="reader__welcome">
+          <div class="reader__welcome-icon">
+            <i i-ri-loader-4-line class="reader__spinner" />
           </div>
-          <WalineComment :path="currentPath" />
-        </aside>
+          <h2>正在载入</h2>
+          <p>文章内容载入中…</p>
+        </div>
       </div>
     </template>
   </div>
@@ -108,11 +119,11 @@ function goBack() {
   height: 100%;
   display: flex;
   min-height: 0;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--st-app-bg);
 }
 
 html.dark .reader {
-  background: rgba(24, 24, 28, 0.4);
+  background: var(--st-app-bg-dark);
 }
 
 .reader__list {
@@ -192,7 +203,7 @@ html.dark .reader__welcome {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2f80ed, #56ccf2);
+  background: var(--st-avatar-gradient);
   color: #fff;
   font-size: 34px;
   margin-bottom: 8px;
@@ -203,12 +214,16 @@ html.dark .reader__welcome {
 .reader__welcome h2 {
   margin: 0;
   font-size: 20px;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
 }
 
 .reader__welcome p {
   margin: 0;
   font-size: 13px;
+}
+
+.reader__spinner {
+  animation: st-spin 1s linear infinite;
 }
 
 .reader__comments {
@@ -227,7 +242,7 @@ html.dark .reader__comments {
   gap: 6px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   margin-bottom: 8px;
 }
 
@@ -263,7 +278,7 @@ html.dark .reader__mobile-bar {
   border: none;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.06);
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;

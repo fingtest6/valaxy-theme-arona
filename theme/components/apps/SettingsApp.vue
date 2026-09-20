@@ -2,9 +2,10 @@
 import { useAppStore, useLocale, useSiteConfig } from 'valaxy'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useThemeConfig } from '../../composables'
+import { useThemeConfig, useWebWallpaper } from '../../composables'
 import { useDesktop } from '../../composables/desktop'
 import { useIsMobile } from '../../composables/useIsMobile'
+import { STORAGE_KEYS, writeStorage } from '../../shared/storage'
 
 const appStore = useAppStore()
 const desktop = useDesktop()
@@ -14,6 +15,13 @@ const { toggleLocales } = useLocale()
 const { locale } = useI18n()
 
 const isMobile = useIsMobile()
+
+const {
+  available: webWallpaperAvailable,
+  enabled: webWallpaperEnabled,
+  mobile: webWallpaperMobile,
+  toggle: toggleWebWallpaper,
+} = useWebWallpaper()
 
 const ACCENTS = [
   { name: '蓝色', value: '#0078E7' },
@@ -35,14 +43,12 @@ function setAccent(color: string) {
 
 function setMode(mode: 'fullscreen' | 'window') {
   desktop.setDisplayMode(mode)
-  if (typeof localStorage !== 'undefined')
-    localStorage.setItem('arona-article-mode', mode)
+  writeStorage(STORAGE_KEYS.articleMode, mode)
 }
 
 function setWindowStyle(style: 'mac' | 'windows') {
   desktop.setWindowStyle(style)
-  if (typeof localStorage !== 'undefined')
-    localStorage.setItem('arona-window-style', style)
+  writeStorage(STORAGE_KEYS.windowStyle, style)
 }
 
 function onFooterClick() {
@@ -97,6 +103,31 @@ function toggleDark(e: MouseEvent) {
           :class="{ 'is-active': desktop.accent.value === c.value }"
           @click="setAccent(c.value)"
         />
+      </div>
+    </div>
+
+    <div
+      v-if="webWallpaperAvailable && (webWallpaperMobile || !isMobile)"
+      class="settings-app__group"
+    >
+      <h3 class="settings-app__heading">
+        网页壁纸
+      </h3>
+
+      <div class="setting-row">
+        <div class="setting-row__label">
+          <span class="setting-row__title">桌面网页壁纸</span>
+          <span class="setting-row__hint">{{ webWallpaperEnabled ? '已开启' : '已关闭' }}</span>
+        </div>
+        <button
+          class="switch"
+          :class="{ 'is-on': webWallpaperEnabled }"
+          role="switch"
+          :aria-checked="webWallpaperEnabled"
+          @click="toggleWebWallpaper"
+        >
+          <span class="switch__thumb" />
+        </button>
       </div>
     </div>
 
@@ -194,11 +225,11 @@ function toggleDark(e: MouseEvent) {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--st-app-bg);
 }
 
 html.dark .settings-app {
-  background: rgba(24, 24, 28, 0.4);
+  background: var(--st-app-bg-dark);
 }
 
 .settings-app__group {
@@ -242,7 +273,7 @@ html.dark .settings-app__heading {
 .setting-row__title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
 }
 
 .setting-row__hint {
@@ -267,7 +298,7 @@ html.dark .setting-row__hint {
 }
 
 .switch.is-on {
-  background: var(--st-accent, #0078e7);
+  background: var(--st-accent);
 }
 
 .switch__thumb {
@@ -329,11 +360,14 @@ html.dark .setting-row__hint {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.03);
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .mode-btn i {
@@ -345,7 +379,7 @@ html.dark .setting-row__hint {
 }
 
 .mode-btn.is-active {
-  background: var(--st-accent, #0078e7);
+  background: var(--st-accent);
   border-color: transparent;
   color: #fff;
 }
@@ -367,7 +401,7 @@ html.dark .mode-btn:hover {
   border: none;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.08);
-  color: var(--va-c-text, #333);
+  color: var(--va-c-text);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
