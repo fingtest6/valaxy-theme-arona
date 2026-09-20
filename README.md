@@ -109,24 +109,27 @@ export default defineValaxyConfig({
   unocss: { safelist },
 })
 ```
+
 ## 其他APP
+
 ```ts
 export default defineValaxyConfig({
 // site config see site.config.ts
 
-theme: 'arona',
+  theme: 'arona',
 
-themeConfig: {
-// 部分App开关    
+  themeConfig: {
+    // 部分App开关
     apps: {
-        files: true, //文件
-        notes: true, //笔记
-        album: true, //相册
+      files: true, // 文件
+      notes: true, // 笔记
+      album: true, // 相册
     },
-},
-unocss: { safelist },
+  },
+  unocss: { safelist },
 })
 ```
+
 ### 相册配置
 
 将图片放在项目根目录的 `photos`里并创建一个 `index.md`
@@ -136,11 +139,14 @@ your-site/
 ├── public/
 └── photos/
     ├── index.md
-    └──... 
+    └──...
 ```
+
 index.md的内容为
+
 ### 示例
-```markdown
+
+```txt
 ---
 title: 相册
 description: 这里记录一些喜欢的画面。
@@ -156,6 +162,7 @@ photos:
     description: 秋天,树叶落地。
 ---
 ```
+
 支持本地图片与网络图片
 
 ## 网页壁纸
