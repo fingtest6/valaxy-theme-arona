@@ -210,6 +210,30 @@ export function createWallpaperPlugin(options: ResolvedValaxyOptions<ThemeConfig
     : ''
   const sourceDir = localDir ? path.resolve(userRoot, localDir) : ''
 
+  /**
+   * 本地壁纸资源不可用时，直接把网页壁纸关掉。
+   *
+   * 否则 iframe 会去请求一个并不存在的路径，而 valaxy dev server 与 Netlify 等带 SPA 回退的
+   * 托管会把这个请求回退成博客自己的 index.html —— 于是「博客里又套了一个博客」：
+   * 整个桌面（Dock、菜单栏、窗口）被一层层重复渲染，控制台里也会出现好几遍启动日志。
+   */
+  const wallpaperUnavailable = (() => {
+    if (!sourceDir)
+      return false
+    if (!existsSync(sourceDir))
+      return true
+    // 没有显式配置 url 时，入口就是 <dir>/index.html，缺了同样会回退到博客自身
+    const explicitUrl = options.config.themeConfig?.wallpaper?.web?.url?.trim()
+    return !explicitUrl && !existsSync(path.join(sourceDir, 'index.html'))
+  })()
+
+  if (wallpaperUnavailable) {
+    console.warn(`[valaxy-theme-arona] 网页壁纸资源不可用: ${sourceDir}，已自动关闭网页壁纸（避免 iframe 回退加载博客自身）`)
+    const webConfig = options.config.themeConfig?.wallpaper?.web
+    if (webConfig)
+      webConfig.enable = false
+  }
+
   let resolvedConfig: ResolvedConfig | null = null
 
   return {
@@ -220,13 +244,8 @@ export function createWallpaperPlugin(options: ResolvedValaxyOptions<ThemeConfig
     },
 
     configureServer(server) {
-      if (!web.enable || !localDir || !sourceDir)
+      if (!web.enable || !localDir || !sourceDir || wallpaperUnavailable)
         return
-
-      if (!existsSync(sourceDir)) {
-        console.warn(`[valaxy-theme-arona] 未找到网页壁纸目录: ${sourceDir}，跳过静态挂载`)
-        return
-      }
 
       const prefix = joinPath(resolvedConfig?.base || server.config.base || '/', localDir)
       const serve = sirv(sourceDir, { dev: true, etag: true, single: false })
@@ -270,13 +289,8 @@ export function createWallpaperPlugin(options: ResolvedValaxyOptions<ThemeConfig
       if (!resolvedConfig || resolvedConfig.command !== 'build' || resolvedConfig.build.ssr)
         return
 
-      if (!web.enable || !localDir || !sourceDir)
+      if (!web.enable || !localDir || !sourceDir || wallpaperUnavailable)
         return
-
-      if (!existsSync(sourceDir)) {
-        console.warn(`[valaxy-theme-arona] 未找到网页壁纸目录: ${sourceDir}，跳过复制`)
-        return
-      }
 
       const outDir = path.resolve(resolvedConfig.root, resolvedConfig.build.outDir)
       const targetDir = path.resolve(outDir, localDir)

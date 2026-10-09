@@ -53,7 +53,7 @@ export default defineConfig<ThemeConfig>({
       blur: false,
       // 网页壁纸：资源目录为 demo/wallpaper（不在 public，禁用后不会输出）
       web: {
-        enable: true,
+        enable: false,
         // 生产环境注册 Service Worker，二次访问秒开
         cache: true,
         // 网页壁纸可交互（默认开启），窗口仍可正常操作

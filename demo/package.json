@@ -10,7 +10,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "valaxy": "^1.0.0-rc.12",
+    "valaxy": "^1.1.0",
     "vue": "^3.5.41"
   }
 }
