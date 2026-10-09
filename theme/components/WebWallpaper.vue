@@ -27,10 +27,12 @@ const props = withDefaults(defineProps<{
   interactive: false,
 })
 
-const { markLoaded } = useWebWallpaper()
+const { markLoaded, setEnabled } = useWebWallpaper()
 
 const shouldRender = ref(false)
 const loaded = ref(false)
+/** iframe 里加载到的其实是博客自身（资源缺失 + 托管 SPA 回退），已放弃网页壁纸 */
+const selfEmbedded = ref(false)
 let disposed = false
 
 // 卸载时需要取消的待执行句柄
@@ -62,6 +64,37 @@ onBeforeUnmount(() => {
 function onFrameLoad() {
   loaded.value = true
   markLoaded()
+}
+
+/**
+ * iframe 里是不是加载到了博客自己？
+ *
+ * dev server 与 Netlify 等托管会把不存在的路径回退到 index.html，壁纸地址一旦失效
+ * （目录缺失 / 路径写错），iframe 里就会再跑一份博客：桌面被一层层套娃渲染。
+ * 同源文档才读得到，看到 Valaxy 生成的页面就判定为自嵌套并停掉网页壁纸。
+ */
+function isBlogDocument(doc: Document | null) {
+  if (!doc)
+    return false
+  try {
+    return !!doc.querySelector('#valaxy-teleports')
+      || !!doc.querySelector('meta[name="generator"][content^="Valaxy"]')
+  }
+  catch {
+    return false
+  }
+}
+
+function handleFrameLoad(event: Event) {
+  const frame = event.target as HTMLIFrameElement
+  if (isBlogDocument(frame.contentDocument)) {
+    selfEmbedded.value = true
+    loaded.value = false
+    setEnabled(false, false)
+    console.warn('[valaxy-theme-arona] 网页壁纸地址返回的是博客自身(可能是壁纸资源缺失)已停止加载网页壁纸')
+    return
+  }
+  onFrameLoad()
 }
 
 /**
@@ -140,7 +173,7 @@ onMounted(() => {
     aria-hidden="true"
   >
     <iframe
-      v-if="shouldRender"
+      v-if="shouldRender && !selfEmbedded"
       class="web-wallpaper__frame"
       :src="url"
       title="网页壁纸"
@@ -149,7 +182,7 @@ onMounted(() => {
       frameborder="0"
       tabindex="-1"
       loading="lazy"
-      @load="onFrameLoad"
+      @load="handleFrameLoad"
     />
   </div>
 </template>

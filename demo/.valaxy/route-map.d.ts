@@ -119,7 +119,7 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    '../node_modules/.pnpm/valaxy@1.0.0-rc.12_patch_ha_abc0967523226c9ef1ee0d651a857c20/node_modules/valaxy/client/pages/[...path].vue': {
+    '../node_modules/.pnpm/valaxy@1.1.0_patch_hash=977_d647b7a3bcd783f5f70c89181a30f775/node_modules/valaxy/client/pages/[...path].vue': {
       routes:
         | '/[...path]'
       views:
